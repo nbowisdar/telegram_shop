@@ -1,6 +1,6 @@
 from setup import bot, dp
-from src.handlers.user_handlers import user_router
-from src.handlers.admin_handlers import admin_router
+from src.telegram.handlers.user_handlers import user_router
+from src.telegram.handlers.admin_handlers import admin_router
 import asyncio
 from loguru import logger
 
