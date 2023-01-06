@@ -2,6 +2,7 @@ from aiogram import Dispatcher, Bot, Router
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
@@ -13,3 +14,7 @@ dp = Dispatcher()
 admin_router = Router()
 user_router = Router()
 # common_router = Router()
+
+
+BASE_DIR = os.path.dirname(__file__)
+
