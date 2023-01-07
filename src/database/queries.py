@@ -37,8 +37,8 @@ def get_all_accounts() -> list[AccountModel]:
     ]
 
 
-def get_account_by_name(name: str) -> int:
-    return Account.get(name=name).id
+def get_account_by_name(name: str) -> Account:
+    return Account.get(name=name)
 
 
 def create_order(order=OrderModel):
@@ -58,11 +58,13 @@ def get_order_by_id(order_id: int) -> OrderModel:
     order = Order.get(id=order_id)
     return OrderModel(
         user_id=order.user_id,
-        account_name=order.account_name,
+        account_name=order.account.name,
+        account_price=order.account.price,
+        account_id=None,
         city=order.city,
         sex=order.sex,
         with_discount=order.with_discount,
-        disc_code=order.disc_code,
+        disc_code=None,
         selfie=order.selfie,
         car=order.car,
         note=order.note

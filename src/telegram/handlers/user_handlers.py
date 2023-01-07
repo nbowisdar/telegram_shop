@@ -40,7 +40,7 @@ async def test(message: Message):
 
 @user_router.message(F.text == "/test")
 async def test(message: Message):
-    order = get_order_by_id(1)
+    order = get_order_by_id(2)
     msg = show_order(order)
-    await message.answer(msg)
+    await message.answer(msg, parse_mode="MARKDOWN")
 

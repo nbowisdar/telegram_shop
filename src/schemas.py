@@ -1,11 +1,13 @@
 from dataclasses import dataclass
+from typing import NamedTuple
 
 
 @dataclass
 class OrderModel:
     user_id: int
     account_name: str
-    account_id: int
+    account_price: float
+    account_id: int | None
     city: str
     sex: str
     with_discount: bool

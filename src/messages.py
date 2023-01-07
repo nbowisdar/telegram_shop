@@ -13,11 +13,20 @@ def show_accounts_price() -> str:
 
 
 def show_order(order: OrderModel) -> str:
+    if order.with_discount:
+        price = f"*{round(order.account_price / 100 * 80, 2)}* руб.\nСКИДКА - {round(order.account_price / 100 * 20, 2)}"
+    else:
+        price = order.account_price
     msg = f"""
 Информация про заказ:
 id заказчика - `{order.user_id}`
-Товар - *{order.account_name}*
+Товар - *{order.account_name}* 
+Цена - {price} руб.
 Город - *{order.city}*
 Пол - *{order.sex}*
-          """
+"""
+    if order.car:
+        msg += f"Машина - *{order.car}*\n"
+    if order.note:
+        msg += f"Коментарий - {order.note}\n"
     return msg

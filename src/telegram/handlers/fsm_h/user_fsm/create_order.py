@@ -17,6 +17,7 @@ class OrdrState(StatesGroup):
     user_id = State()
     account_name = State()
     account_id = State()
+    account_price = State()
     city = State()
     sex = State()
     with_discount = State()
@@ -40,9 +41,10 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
 
 @user_router.message(OrdrState.account_name)
 async def set_acc_name(message: Message, state: FSMContext):
-    acc_id = get_account_by_name(message.text)
+    acc = get_account_by_name(message.text)
     await state.update_data(account_name=message.text)
-    await state.update_data(account_id=acc_id)
+    await state.update_data(account_id=acc.id)
+    await state.update_data(account_price=acc.price)
     await state.set_state(OrdrState.city)
     await message.reply("Введите свой город.",
                         reply_markup=cancel_btn)
