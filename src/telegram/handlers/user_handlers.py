@@ -3,6 +3,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import F
 from setup import user_router
+from src.messages import show_accounts_price
 from src.telegram.buttons import user_main_btn, build_acc_btns
 from setup import bot
 from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
@@ -12,6 +13,12 @@ from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
 async def test(message: Message):
     await message.answer("bot works",
                          reply_markup=user_main_btn)
+
+
+@user_router.message(F.text == "Цена Аккаунтов💸")
+async def show_price(message: Message):
+    msg = show_accounts_price()
+    await message.answer(msg, reply_markup=user_main_btn)
 
 
 @user_router.message(F.text == "Купить аккаунт⚡️")
