@@ -3,18 +3,20 @@ from pprint import pprint
 from aiogram import F
 from aiogram.filters import Command
 
+from src.messages import show_order
 from src.telegram.buttons import user_main_btn, cancel_btn, sex_btn
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from setup import user_router
-from src.database.queries import check_promo
+from src.database.queries import check_promo, create_order, get_account_by_name
 from src.schemas import OrderModel
 
 
 class OrdrState(StatesGroup):
     user_id = State()
     account_name = State()
+    account_id = State()
     city = State()
     sex = State()
     with_discount = State()
@@ -38,7 +40,9 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
 
 @user_router.message(OrdrState.account_name)
 async def set_acc_name(message: Message, state: FSMContext):
+    acc_id = get_account_by_name(message.text)
     await state.update_data(account_name=message.text)
+    await state.update_data(account_id=acc_id)
     await state.set_state(OrdrState.city)
     await message.reply("Введите свой город.",
                         reply_markup=cancel_btn)
@@ -128,5 +132,7 @@ async def set_acc_name(message: Message, state: FSMContext):
 
 async def save_order(message: Message, data: dict):
     struct_data = OrderModel(**data)
-
-    await message.answer("Вы создали новый заказ!")
+    print(struct_data)
+    create_order(struct_data)
+    msg = "Вы создали новый заказ!" + show_order(struct_data)
+    await message.answer(msg, reply_markup=user_main_btn, parse_mode="MARKDOWN")

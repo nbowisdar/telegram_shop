@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class OrderModel:
     user_id: int
     account_name: str
+    account_id: int
     city: str
     sex: str
     with_discount: bool

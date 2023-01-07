@@ -3,7 +3,8 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram import F
 from setup import user_router
-from src.messages import show_accounts_price
+from src.database.queries import get_order_by_id
+from src.messages import show_accounts_price, show_order
 from src.telegram.buttons import user_main_btn, build_acc_btns
 from setup import bot
 from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
@@ -29,7 +30,6 @@ async def new_order(message: Message, state: FSMContext):
     await state.update_data(user_id=message.from_user.id)
 
 
-
 @user_router.message(F.photo)
 async def test(message: Message):
     await message.answer("get photo")
@@ -37,10 +37,10 @@ async def test(message: Message):
     print(photo)
     print(photo[-1])
 
-#
-#
+
 @user_router.message(F.text == "/test")
 async def test(message: Message):
-    await message.answer("get photo")
-    photo = message.photo
-    print(type(photo[-1].file_id))
+    order = get_order_by_id(1)
+    msg = show_order(order)
+    await message.answer(msg)
+
