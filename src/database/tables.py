@@ -11,7 +11,7 @@ class BaseModel(Model):
         database = db
 
 
-class Service(BaseModel):
+class Account(BaseModel):
     name = CharField()
     price = FloatField()
 
@@ -19,14 +19,16 @@ class Service(BaseModel):
 class Order(BaseModel):
     user_id = IntegerField()
     city = CharField()
-    photo = CharField()  # we will be store a file_id from tg
+    selfie = CharField()  # we will be store a file_id from tg
+    sex = CharField()
+    car = CharField(null=True)
     with_discount = BooleanField(default=False)
     note = CharField(null=True)
-    service = ForeignKeyField(Service, backref="orders")
+    account = ForeignKeyField(Account, backref="orders")
 
 
 class PromoCode(BaseModel):
-    name = CharField()
+    name = CharField(unique=True)
     count_of_use = IntegerField(default=0)
 
 
