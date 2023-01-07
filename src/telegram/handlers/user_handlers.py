@@ -1,11 +1,11 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
-from aiogram.filters import Command
+from aiogram.types import Message, CallbackQuery
+from aiogram.filters import Command, Text
 from aiogram import F
 from setup import user_router
 from src.database.queries import get_order_by_id
 from src.messages import show_accounts_price, show_order
-from src.telegram.buttons import user_main_btn, build_acc_btns
+from src.telegram.buttons import user_main_btn, build_acc_btns, community_btn
 from setup import bot
 from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
 
@@ -30,6 +30,12 @@ async def new_order(message: Message, state: FSMContext):
     await state.update_data(user_id=message.from_user.id)
 
 
+@user_router.message(F.text == "Обратная связь✍️")
+async def community(message: Message):
+    await message.answer("🦾",
+                         reply_markup=community_btn)
+
+
 @user_router.message(F.photo)
 async def test(message: Message):
     await message.answer("get photo")
@@ -43,4 +49,5 @@ async def test(message: Message):
     order = get_order_by_id(2)
     msg = show_order(order)
     await message.answer(msg, parse_mode="MARKDOWN")
+
 

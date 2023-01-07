@@ -4,6 +4,7 @@ from aiogram import F
 from aiogram.filters import Command
 
 from src.messages import show_order
+from src.other import send_new_order_to_admin
 from src.telegram.buttons import user_main_btn, cancel_btn, sex_btn
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -134,7 +135,13 @@ async def set_acc_name(message: Message, state: FSMContext):
 
 async def save_order(message: Message, data: dict):
     struct_data = OrderModel(**data)
-    print(struct_data)
     create_order(struct_data)
-    msg = "Вы создали новый заказ!" + show_order(struct_data)
+    order_msg = show_order(struct_data)
+    # increase the amount of use
+    check_promo(name=struct_data.disc_code, incr_amount=True)
+
+    msg = "Вы создали новый заказ!" + order_msg
     await message.answer(msg, reply_markup=user_main_btn, parse_mode="MARKDOWN")
+
+    order_msg = f"Пользователь `{message.from_user.id}` создал новый заказ!\n" + order_msg
+    await send_new_order_to_admin(order_msg, struct_data.selfie)

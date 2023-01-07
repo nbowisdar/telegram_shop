@@ -1,11 +1,11 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from src.database.queries import get_all_accounts
 
 kb1 = [
     [KeyboardButton(text="Цена Аккаунтов💸"), KeyboardButton(text="Купить аккаунт⚡️")],
-    [KeyboardButton(text="Тех поддержка💻"), KeyboardButton(text="Наш канал🎩")],
+    [KeyboardButton(text="Обратная связь✍️")]
 ]
 
 user_main_btn = ReplyKeyboardMarkup(
@@ -22,6 +22,14 @@ sex_btn = ReplyKeyboardMarkup(
     keyboard=kb2,
     resize_keyboard=True
 )
+
+
+kb_inline1 = [
+    [InlineKeyboardButton(text="Тех поддержка💻", url="https://t.me/smblikeme")],
+    [InlineKeyboardButton(text="Наш канал🎩", url="https://t.me/test_channel_chicago")]
+]
+
+community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 
 def build_acc_btns() -> ReplyKeyboardMarkup:

@@ -18,7 +18,6 @@ def show_order(order: OrderModel) -> str:
     else:
         price = order.account_price
     msg = f"""
-Информация про заказ:
 id заказчика - `{order.user_id}`
 Товар - *{order.account_name}* 
 Цена - {price} руб.
