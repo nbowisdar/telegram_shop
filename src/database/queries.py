@@ -11,12 +11,13 @@ def _generate_promo_code(num_char: int) -> str:
 
     for i in range(num_char):
         code += random.choice(symbl)
-    return code
+    return code[0:4] + "_" + code[4:]
 
 
-def generate_new_code(num_char=10) -> str:
+def generate_new_code(num_char=8) -> str:
     code = _generate_promo_code(num_char)
     PromoCode.create(name=code)
+    print(code)
     return code
 
 
@@ -72,5 +73,4 @@ def get_order_by_id(order_id: int) -> OrderModel:
 
 
 if __name__ == '__main__':
-    acc = Account.get(name='one')
-    print(acc)
+    check_promo("3E7a_NcwD", incr_amount=True)

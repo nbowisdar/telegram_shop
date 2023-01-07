@@ -1,4 +1,5 @@
 from setup import bot, dp
+from src.database.tables import create_table
 from src.telegram.handlers.user_handlers import user_router
 from src.telegram.handlers.admin_handlers import admin_router
 import asyncio
@@ -12,6 +13,7 @@ async def _start():
 
 
 def start_bot():
+    create_table()
     asyncio.run(_start())
 
 
