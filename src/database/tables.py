@@ -33,7 +33,7 @@ class PromoCode(BaseModel):
 
 
 def create_table():
-    tables = [Service, Order, PromoCode]
+    tables = [Account, Order, PromoCode]
     db.create_tables(tables)
 
 

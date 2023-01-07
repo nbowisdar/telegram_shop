@@ -1,2 +1,3 @@
-from src.telegram.buttons.user_btn import user_main_btn
-from src.telegram.buttons.admin_btns import admin_main_kb
+from src.telegram.buttons.user_btn import *
+from src.telegram.buttons.admin_btns import *
+from src.telegram.buttons.common_btns import *

@@ -1,6 +1,8 @@
-from src.database.tables import db, Service, Order, PromoCode
+from src.database.tables import db, Account, Order, PromoCode
 import string
 import random
+
+from src.schemas import AccountModel
 
 
 def _generate_promo_code(num_char: int) -> str:
@@ -18,18 +20,24 @@ def generate_new_code(num_char=10) -> str:
     return code
 
 
-def _get_promo():
-    pass
-
-
-def check_promo(name: str) -> bool:
+def check_promo(name: str, incr_amount=False) -> str | None:
     promo = PromoCode.get_or_none(PromoCode.name == name)
     if not promo:
-        return False
-    promo.count_of_use += 1
-    promo.save()
-    return True
+        return
+    if incr_amount:
+        promo.count_of_use += 1
+        promo.save()
+    return name
+
+
+def get_all_accounts() -> list[AccountModel]:
+    return [
+        AccountModel(name=acc.name, price=acc.price)
+        for acc in Account.select()
+    ]
+
 
 
 if __name__ == '__main__':
-    generate_new_code()
+    x = get_all_accounts()
+    print(x)
