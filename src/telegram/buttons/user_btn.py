@@ -5,7 +5,7 @@ from src.database.queries import get_all_accounts
 
 kb1 = [
     [KeyboardButton(text="Цена Аккаунтов💸"), KeyboardButton(text="Купить аккаунт⚡️")],
-    [KeyboardButton(text="Обратная связь✍️")]
+    [KeyboardButton(text="Обратная связь✍️"), KeyboardButton(text="Применить промокод🧩")]
 ]
 
 user_main_btn = ReplyKeyboardMarkup(

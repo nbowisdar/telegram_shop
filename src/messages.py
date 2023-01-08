@@ -18,7 +18,8 @@ def show_order(order: OrderModel) -> str:
     else:
         price = order.account_price
     msg = f"""
-id заказчика - `{order.user_id}`
+id заказчика - [{order.user_id}](tg://user?id={order.user_id})
+Username - `@{order.account_username}`
 Товар - *{order.account_name}* 
 Цена - {price} руб.
 Город - *{order.city}*

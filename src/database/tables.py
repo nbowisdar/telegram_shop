@@ -18,6 +18,7 @@ class Account(BaseModel):
 
 class Order(BaseModel):
     user_id = IntegerField()
+    account_username = CharField()
     city = CharField()
     selfie = CharField()  # we will be store a file_id from tg
     sex = CharField()
@@ -32,8 +33,13 @@ class PromoCode(BaseModel):
     count_of_use = IntegerField(default=0)
 
 
+class UserWithCode(BaseModel):
+    user_id = IntegerField(unique=True)
+    code = CharField()
+
+
 def create_table():
-    tables = [Account, Order, PromoCode]
+    tables = [Account, Order, PromoCode, UserWithCode]
     db.create_tables(tables)
 
 

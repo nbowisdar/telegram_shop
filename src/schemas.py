@@ -7,6 +7,7 @@ class OrderModel:
     user_id: int
     # order_id: int
     account_name: str
+    account_username: str
     account_price: float
     account_id: int | None
     city: str

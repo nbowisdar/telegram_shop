@@ -18,6 +18,7 @@ class OrdrState(StatesGroup):
     user_id = State()
     account_name = State()
     account_id = State()
+    account_username = State()
     account_price = State()
     city = State()
     sex = State()
@@ -44,6 +45,8 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
 async def set_acc_name(message: Message, state: FSMContext):
     acc = get_account_by_name(message.text)
     await state.update_data(account_name=message.text)
+    await state.update_data(account_username=message.from_user.username)
+
     await state.update_data(account_id=acc.id)
     await state.update_data(account_price=acc.price)
     await state.set_state(OrdrState.city)

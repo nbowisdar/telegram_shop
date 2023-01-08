@@ -36,18 +36,16 @@ async def community(message: Message):
                          reply_markup=community_btn)
 
 
-@user_router.message(F.photo)
-async def test(message: Message):
-    await message.answer("get photo")
-    photo = message.photo
-    print(photo)
-    print(photo[-1])
-
-
 @user_router.message(F.text == "/test")
 async def test(message: Message):
-    order = get_order_by_id(2)
+    order = get_order_by_id(1)
     msg = show_order(order)
     await message.answer(msg, parse_mode="MARKDOWN")
+
+
+@user_router.message(F.text == "Применить промокод🧩")
+async def test(message: Message):
+
+    await message.answer("dwa", parse_mode="MARKDOWN")
 
 

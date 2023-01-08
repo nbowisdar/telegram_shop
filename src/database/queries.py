@@ -1,4 +1,4 @@
-from src.database.tables import db, Account, Order, PromoCode
+from src.database.tables import db, Account, Order, PromoCode, UserWithCode
 import string
 import random
 
@@ -46,6 +46,7 @@ def create_order(order=OrderModel):
     Order.create(
         user_id=order.user_id,
         account=order.account_id,
+        account_username=order.account_username,
         city=order.city,
         sex=order.sex,
         with_discount=order.with_discount,
@@ -61,6 +62,7 @@ def get_order_by_id(order_id: int) -> OrderModel:
         user_id=order.user_id,
         account_name=order.account.name,
         account_price=order.account.price,
+        account_username=order.account_username,
         account_id=None,
         city=order.city,
         sex=order.sex,
@@ -72,5 +74,26 @@ def get_order_by_id(order_id: int) -> OrderModel:
     )
 
 
+def save_code_to_user(user_id: int, code: str):
+    user = UserWithCode.get_or_none(user_id=user_id)
+    if user:
+        raise ValueError("Вы уже использовали промокод!")
+    UserWithCode.create(user_id=user_id, code=code)
+
+
+def is_has_code(user_id: int) -> str | None:
+    user = UserWithCode.get_or_none(user_id=user_id)
+    return user.code
+
+
+def delete_code_from_user(user_id: int):
+    user = UserWithCode.get_or_none(user_id=user_id)
+    if user:
+        user.delete().execute()
+
+
 if __name__ == '__main__':
-    check_promo("3E7a_NcwD", incr_amount=True)
+    save_code_to_user(123, '213')
+    code = is_has_code(123)
+    print(code)
+    delete_code_from_user(123)
