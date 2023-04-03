@@ -1,10 +1,10 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from src.database.queries import get_all_accounts
+# from src.database.queries import get_all_accounts
 
 kb1 = [
-    [KeyboardButton(text="Цена Аккаунтов💸"), KeyboardButton(text="Купить аккаунт⚡️")],
+    [KeyboardButton(text="Цена Аккаунтов💸"), KeyboardButton(text="Додати адрес🏠")],
     [KeyboardButton(text="Обратная связь✍️"), KeyboardButton(text="Применить промокод🧩")]
 ]
 
@@ -33,7 +33,8 @@ community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 
 def build_acc_btns() -> ReplyKeyboardMarkup:
-    accounts = get_all_accounts()
+    # accounts = get_all_accounts()
+    accounts = []
     builder = ReplyKeyboardBuilder()
     for acc in accounts:
         builder.add(KeyboardButton(text=acc.name))

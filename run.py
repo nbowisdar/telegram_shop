@@ -5,8 +5,11 @@ from src.telegram.handlers.admin_handlers import admin_router
 import asyncio
 from loguru import logger
 
+from src.telegram.middleware.admin_only import AdminOnly
+
 
 async def _start():
+    admin_router.message.middleware(AdminOnly())
     dp.include_router(admin_router)
     dp.include_router(user_router)
     await dp.start_polling(bot)

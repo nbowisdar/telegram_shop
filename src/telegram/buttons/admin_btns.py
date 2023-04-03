@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 
 kb1 = [
-    [KeyboardButton(text="Заказы"), KeyboardButton(text="Создать промокод")]
+    [KeyboardButton(text="Заказы"), KeyboardButton(text="Створити новий промокод")]
 ]
 
 

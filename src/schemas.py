@@ -1,25 +1,17 @@
-from dataclasses import dataclass
-from typing import NamedTuple
+# from dataclasses import dataclass
+import decimal
+from typing import NamedTuple, TypedDict
 
 
-@dataclass
-class OrderModel:
-    user_id: int
-    # order_id: int
-    account_name: str
-    account_username: str
-    account_price: float
-    account_id: int | None
+class AddressModel(TypedDict):
+    full_name: str
+    mobile_number: str
     city: str
-    sex: str
-    with_discount: bool
-    disc_code: str | None
-    selfie: str
-    car: str | None
-    note: str | None
+    post_number: int
+    user: int
 
 
-@dataclass
-class AccountModel:
+class GoodsModel(TypedDict):
     name: str
-    price: float
+    desc: str
+    price: decimal.Decimal
