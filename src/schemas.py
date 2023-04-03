@@ -2,6 +2,8 @@
 import decimal
 from typing import NamedTuple, TypedDict
 
+from src.database.tables import Order
+
 
 class AddressModel(TypedDict):
     full_name: str
@@ -15,3 +17,9 @@ class GoodsModel(TypedDict):
     name: str
     desc: str
     price: decimal.Decimal
+
+
+class UserModel(NamedTuple):
+    user_id: int
+    orders: list[Order]
+    address: AddressModel | None

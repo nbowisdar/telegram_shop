@@ -13,6 +13,7 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+
 class User(BaseModel):
     user_id = IntegerField(unique=True, primary_key=True)
 
@@ -32,7 +33,7 @@ class Address(BaseModel):
 
 
 class Order(BaseModel):
-    time_created = DateTimeField(datetime.now)
+    time_created = DateTimeField(default=datetime.now)
     ordered_goods = ForeignKeyField(Goods, backref="orders")
     user = ForeignKeyField(User, backref="orders")
     with_discount = BooleanField(default=False)
@@ -42,8 +43,6 @@ class Order(BaseModel):
 class PromoCode(BaseModel):
     code = CharField(unique=True)
     count_of_use = IntegerField(default=0)
-
-
 
 
 def create_table():

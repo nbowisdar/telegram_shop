@@ -66,7 +66,6 @@ async def set_name(message: Message, state: FSMContext):
         await state.update_data(post_number=message.text)
         data = await state.get_data()
         data = AddressModel(**data)
-        pprint(data)
         try:
             create_address(data, message.from_user.id)
             msg = "✅ Ви додали адресс!"
