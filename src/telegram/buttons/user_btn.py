@@ -7,12 +7,30 @@ from src.database.crud.get import get_user_schema_by_id
 
 kb1 = [
     [KeyboardButton(text="🛒 Обрати товар"), KeyboardButton(text="🕺 Мій профіль")],
-    [KeyboardButton(text="✍️ Зворотній зв'язок"), KeyboardButton(text="🧩 Застосувати промокод")]
+    [KeyboardButton(text="✍️ Зворотній зв'язок")]
 ]
+
+promo_kb = KeyboardButton(text="🧩 Застосувати промокод")
 
 user_main_btn = ReplyKeyboardMarkup(
     keyboard=kb1,
     resize_keyboard=True
+)
+
+"""
+    full_name: str
+    mobile_number: str
+    city: str
+    post_number: int
+    user: int
+"""
+addr_inline_fields = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Повне ім'я", callback_data="full_name")],
+        [InlineKeyboardButton(text="Мобільний номер", callback_data="mobile_number")],
+        [InlineKeyboardButton(text="Місто", callback_data="city")],
+        [InlineKeyboardButton(text="НП відділення", callback_data="post_number")],
+    ]
 )
 
 
@@ -25,7 +43,8 @@ def build_profile_kb(user_id: int) -> ReplyKeyboardMarkup:
 
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=addr_btn), KeyboardButton(text="📦 Мої замовлення")]
+            [KeyboardButton(text=addr_btn), KeyboardButton(text="📦 Мої замовлення")],
+            [KeyboardButton(text="↩️ На головну")]
         ],
         resize_keyboard=True
     )

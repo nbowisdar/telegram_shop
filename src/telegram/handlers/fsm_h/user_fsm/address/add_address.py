@@ -42,7 +42,7 @@ async def set_name(message: Message, state: FSMContext):
     number = message.text
     if not number.isdigit() or len(number) != 12 or not number.startswith("380"):
         await state.clear()
-        await message.reply("Не вірний формат!", reply_markup=user_main_btn)
+        await message.reply("❌ Не вірний формат!\nНомер має починатися з 380", reply_markup=user_main_btn)
         return
 
     await state.update_data(mobile_number=message.text)
@@ -61,7 +61,7 @@ async def set_name(message: Message, state: FSMContext):
 async def set_name(message: Message, state: FSMContext):
     number = message.text
     if not number.isdigit():
-        await message.reply("Не вірний формат!", reply_markup=user_main_btn)
+        await message.reply("❌ Не вірний формат!", reply_markup=user_main_btn)
     else:
         await state.update_data(post_number=message.text)
         data = await state.get_data()

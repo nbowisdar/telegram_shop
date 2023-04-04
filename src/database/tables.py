@@ -19,9 +19,10 @@ class User(BaseModel):
 
 
 class Goods(BaseModel):
-    name = CharField(max_length=100)
+    name = CharField(max_length=100, unique=True)
     desc = TextField(null=True)
     price = DecimalField(max_digits=10, decimal_places=2)
+    photo = CharField(null=True)  # link to photo in tg
 
 
 class Address(BaseModel):

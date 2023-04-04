@@ -17,6 +17,7 @@ class GoodsModel(TypedDict):
     name: str
     desc: str
     price: decimal.Decimal
+    photo: str
 
 
 class UserModel(NamedTuple):

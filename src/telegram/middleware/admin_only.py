@@ -1,7 +1,7 @@
 from typing import Callable, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import Message
-from setup import admins
+from config import admins
 
 
 class AdminOnly(BaseMiddleware):

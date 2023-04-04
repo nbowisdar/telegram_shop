@@ -4,6 +4,11 @@ from src.schemas import AddressModel, GoodsModel, UserModel
 users: dict[int, UserModel] = {}
 
 
+def remove_user_from_cache(user_id):
+    if user_id in users.keys():
+        del users[user_id]
+
+
 def get_user_schema_by_id(user_id: int) -> UserModel:
     if user_id in users.keys():
         print("Took from cash!!)")

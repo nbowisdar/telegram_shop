@@ -1,3 +1,5 @@
+import decimal
+
 from aiogram import F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -21,18 +23,25 @@ async def update_filed(message: Message, state: FSMContext):
     await state.clear()
 
     if data['field'] == "mobile_number":
-        number = message.text
-        if not number.isdigit() or len(number) != 12 or not number.startswith("380"):
+        try:
+            new_value = decimal.Decimal(message.text)
+        except decimal.InvalidOperation:
             await state.clear()
-            await message.reply("Не вірний формат!\nНомер має починатися з 380")
-            return
-    elif data['field'] == "post_number":
-        if not message.text.isdigit():
-            await state.clear()
-            await message.reply("Не вірний формат!")
+            await message.reply("❌ Не вірне значення!")
             return
 
-    user_id = message.from_user.id
+    elif data['field'] == "photo":
+        try:
+            new_value = message.photo[-1].file_id
+            await message.delete()
+        except TypeError:
+            await message.reply("❌ Ви повинні відправити фото!",
+                                reply_markup=admin_main_kb)
+            await state.clear()
+            return
+    else:
+        new_value = message.text
+
     update_addr_field(
         user_id=user_id,
         field_name=data['field'],

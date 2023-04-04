@@ -7,16 +7,18 @@ from src.database.crud.get import get_user_schema_by_id
 from src.schemas import UserModel
 # from src.database.queries import get_order_by_id
 # from src.messages import show_accounts_price, show_order
-from src.telegram.buttons import user_main_btn, build_acc_btns, community_btn, cancel_btn, build_profile_kb
+from src.telegram.buttons import user_main_btn, build_acc_btns, community_btn, cancel_btn, build_profile_kb, \
+    addr_inline_fields
 from setup import bot
 from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressState
+from src.telegram.handlers.fsm_h.user_fsm.address.update_address import UpdateAddr
 from src.telegram.messages.user_msg import build_address_msg
 
 
 # from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
 
 
-@user_router.message(Command(commands='start'))
+@user_router.message(F.text.in_(['/start', "↩️ На головну"]))
 async def test(message: Message):
     await message.answer("bot works",
                          reply_markup=user_main_btn)
@@ -50,19 +52,35 @@ async def community(message: Message):
 
 
 @user_router.message(F.text == "🕺 Мій профіль")
-async def community(message: Message):
+async def profile(message: Message):
     await message.answer("🕺  профіль", reply_markup=build_profile_kb(message.from_user.id))
 
 
-@user_router.message(F.text == "🏡 Мій адрес")
-async def community(message: Message):
+@user_router.message(F.text == "🔨 Оновити адрес")
+async def addr(message: Message):
     user = get_user_schema_by_id(message.from_user.id)
     addr = build_address_msg(user.address)
-    print(addr)
-    await message.answer(addr, parse_mode="MARKDOWN")
-                         # reply_markup=build_profile_kb(message.from_user.id))
+    await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 
     # TODO: make adressupdatable
+
+"""
+    full_name: str
+    mobile_number: str
+    city: str
+    post_number: int
+    user: int
+"""
+
+
+@user_router.callback_query(F.data.in_(["full_name", "mobile_number", "city", "post_number"]))
+async def update_addr(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(UpdateAddr.new_value)
+    await state.update_data(field=callback.data)
+    await callback.message.reply("Введіть нове значання:")
+    await callback.answer()
+    # await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
+
 
 # @user_router.message(F.text == "/test")
 # async def test(message: Message):

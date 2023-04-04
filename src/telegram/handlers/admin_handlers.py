@@ -1,25 +1,38 @@
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Text, Command
+from aiogram.filters import Text
 from aiogram import F
 
 from src.database.queries import generate_new_code
-from src.telegram.buttons import admin_main_kb
-from setup import admin_router, admins
+from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn
+from setup import admin_router
 from setup import bot
+from src.telegram.handlers.fsm_h.admin_fsm.goods.add import GoodsState
 
 
-@admin_router.message(F.text == "/admin")
+@admin_router.message(F.text.in_(["/admin", "⬅️ На головну"]))
 async def main(message: Message):
     await message.answer("Ти адмін!",
                          reply_markup=admin_main_kb)
 
 
-@admin_router.message(F.text == 'Створити новий промокод')
+@admin_router.message(F.text == '🔑 Створити новий промокод')
 async def create_promo(message: Message):
     new_cod = generate_new_code()
     await message.reply(f'Ви створили новий промокод - `{new_cod}`',
                         reply_markup=admin_main_kb,
                         parse_mode="MARKDOWN")
+
+
+@admin_router.message(F.text == '🛍 Товари')
+async def create_promo(message: Message):
+    await message.reply(f'Розділ: Товари', reply_markup=admin_goods_kb, parse_mode="MARKDOWN")
+
+
+@admin_router.message(F.text == "✏️ Додати")
+async def add_goods(message: Message, state: FSMContext):
+    await message.answer("Введіть назву товару", reply_markup=admin_cancel_btn)
+    await state.set_state(GoodsState.name)
 
 
 @admin_router.callback_query(Text(text="confirm"))
