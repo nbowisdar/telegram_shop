@@ -60,14 +60,12 @@ kb_inline1 = [
 community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 
-# def build_acc_btns() -> ReplyKeyboardMarkup:
-#     # accounts = get_all_accounts()
-#     accounts = []
-#     builder = ReplyKeyboardBuilder()
-#     for acc in accounts:
-#         builder.add(KeyboardButton(text=acc.name))
-#     builder.adjust(4)
-#     return builder.as_markup(resize_keyboard=True)
+ok_goods = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
+    InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|start")],
+    [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
+])
+
 
 cancel_inl_ord = InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")
 from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")
@@ -82,6 +80,20 @@ def categories_inl() -> InlineKeyboardMarkup:
     builder.adjust(3)
     builder.row(cancel_inl_ord)
     return builder.as_markup()
+
+
+def build_amount_inl():
+    buttons = [
+        [
+            InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),
+            InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
+        ],
+        [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
+        [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
+         InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
 
 
 def build_goods_with_price_inl(category: str) -> InlineKeyboardMarkup:

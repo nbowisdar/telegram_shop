@@ -18,6 +18,7 @@ def update_user_addr_cache(address: AddressModel):
     else:
         users[address.user_id] = UserModel(user_id=address.user_id, address=address, orders=[])
 
+
 def check_goods_existence(goods_name: str) -> bool:
     for g in Goods.select():
         if g.name == goods_name:
@@ -47,6 +48,10 @@ def get_user_schema_by_id(user_id: int) -> UserModel:
     user_model = UserModel(user_id=user_id, orders=orders, address=addr)
     users[user_id] = user_model
     return user_model
+
+
+def get_goods_by_name(name: str) -> GoodsModel:
+    return GoodsModel.from_orm(Goods.get(name=name))
 
 """
 class GoodsModel(TypedDict):

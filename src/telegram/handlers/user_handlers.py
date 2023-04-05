@@ -23,13 +23,6 @@ async def show_price(message: Message, state: FSMContext):
     await message.answer("Введіть ваше повне ім'я", reply_markup=cancel_btn)
 
 
-# @user_router.message(F.text == "Купить аккаунт⚡️")
-# async def new_order(message: Message, state: FSMContext):
-#     await message.answer("Какой аккаунт хотите приобрести?",
-#                          reply_markup=build_acc_btns())
-#     await state.set_state(OrdrState.account_name)
-#     await state.update_data(user_id=message.from_user.id)
-
 
 @user_router.message(F.text == "✍️ Зворотній зв'язок")
 async def community(message: Message):
