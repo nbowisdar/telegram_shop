@@ -69,7 +69,8 @@ community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 #     builder.adjust(4)
 #     return builder.as_markup(resize_keyboard=True)
 
-cancel_inl = InlineKeyboardButton(text="❌ Скасувати", callback_data="cancel_order")
+cancel_inl_ord = InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")
+from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")
 
 
 def categories_inl() -> InlineKeyboardMarkup:
@@ -79,7 +80,7 @@ def categories_inl() -> InlineKeyboardMarkup:
             text=cat.capitalize(), callback_data=f"new_order_cat|{cat}"
         )
     builder.adjust(3)
-    builder.row(cancel_inl)
+    builder.row(cancel_inl_ord)
     return builder.as_markup()
 
 
@@ -91,6 +92,6 @@ def build_goods_with_price_inl(category: str) -> InlineKeyboardMarkup:
             text=f'{g.name}: Ціна - {g.price} грн.', callback_data=f"new_order_g|{g.name}"
         )
     builder.adjust(1)
-    builder.row(cancel_inl)
+    builder.row(from_scratch_inl_ord, cancel_inl_ord)
     return builder.as_markup()
 

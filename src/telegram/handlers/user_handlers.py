@@ -4,47 +4,17 @@ from aiogram.filters import Command, Text
 from aiogram import F
 from setup import user_router
 from src.database.crud.get import get_user_schema_by_id
-from src.schemas import UserModel
 from src.telegram.buttons import user_main_btn, community_btn, cancel_btn, build_profile_kb, \
-    addr_inline_fields, build_goods_with_price_inl, categories_inl
-from setup import bot
+    addr_inline_fields
 from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressState
 from src.telegram.handlers.fsm_h.user_fsm.address.update_address import UpdateAddr
-from src.telegram.handlers.fsm_h.user_fsm.create_order import GoodsState
 from src.telegram.messages.user_msg import build_address_msg
-
-
-# from src.telegram.handlers.fsm_h.user_fsm.create_order import OrdrState
 
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
 async def start(message: Message):
     await message.answer("bot works",
                          reply_markup=user_main_btn)
-
-
-@user_router.message(F.text == "🛒 Обрати товар")
-async def new_order(message: Message, state: FSMContext):
-    await state.set_state(GoodsState.block_input)
-    await message.answer('Генерація нового замовлення 👇', reply_markup=ReplyKeyboardRemove())
-    await message.answer("Оберіть категорію", reply_markup=categories_inl())
-
-
-@user_router.callback_query(Text(startswith="new_order_cat"))
-async def anon(callback: CallbackQuery, state: FSMContext):
-    prefix, category = callback.data.split('|')
-    await state.set_state(GoodsState.block_input)
-    await state.update_data(category=category)
-    await callback.message.edit_text("🛍 Оберіть товар",
-                                     reply_markup=build_goods_with_price_inl(category))
-
-
-# @user_router.callback_query(Text(startswith="new_order_g"))
-# async def anon(callback: CallbackQuery, state: FSMContext):
-#     prefix, category = callback.data.split('|')
-#     await state.update_data(category=category)
-#     await callback.message.edit_text("Оберіть товар",
-#                                      reply_markup=build_goods_with_price_inl(category))
 
 
 @user_router.message(F.text == "🏠 Додати адрес")

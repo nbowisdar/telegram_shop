@@ -2,6 +2,7 @@ from setup import bot, dp
 from src.database.tables import create_table
 from src.telegram.handlers.user_handlers import user_router
 from src.telegram.handlers.admin_handlers import admin_router
+from src.telegram.handlers.order_handlers import order_router
 import asyncio
 from loguru import logger
 
@@ -12,6 +13,7 @@ async def _start():
     admin_router.message.middleware(AdminOnly())
     dp.include_router(admin_router)
     dp.include_router(user_router)
+    dp.include_router(order_router)
     await dp.start_polling(bot)
 
 
