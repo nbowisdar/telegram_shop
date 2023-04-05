@@ -1,5 +1,7 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
+
+from config import categories
 
 admin_cancel_btn = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="🛑 Відмінити")]],
@@ -21,3 +23,9 @@ admin_goods_kb = ReplyKeyboardMarkup(
 ],
     resize_keyboard=True
 )
+
+
+"Inline keyboards bellow"
+
+
+

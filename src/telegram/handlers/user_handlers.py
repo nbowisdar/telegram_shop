@@ -1,17 +1,16 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 from aiogram import F
 from setup import user_router
 from src.database.crud.get import get_user_schema_by_id
 from src.schemas import UserModel
-# from src.database.queries import get_order_by_id
-# from src.messages import show_accounts_price, show_order
-from src.telegram.buttons import user_main_btn, build_acc_btns, community_btn, cancel_btn, build_profile_kb, \
-    addr_inline_fields
+from src.telegram.buttons import user_main_btn, community_btn, cancel_btn, build_profile_kb, \
+    addr_inline_fields, build_goods_with_price_inl, categories_inl
 from setup import bot
 from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressState
 from src.telegram.handlers.fsm_h.user_fsm.address.update_address import UpdateAddr
+from src.telegram.handlers.fsm_h.user_fsm.create_order import GoodsState
 from src.telegram.messages.user_msg import build_address_msg
 
 
@@ -19,16 +18,33 @@ from src.telegram.messages.user_msg import build_address_msg
 
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
-async def test(message: Message):
+async def start(message: Message):
     await message.answer("bot works",
                          reply_markup=user_main_btn)
 
 
 @user_router.message(F.text == "🛒 Обрати товар")
-async def show_price(message: Message):
-    # msg = show_accounts_price()
-    msg = "1"
-    await message.answer(msg, reply_markup=user_main_btn)
+async def new_order(message: Message, state: FSMContext):
+    await state.set_state(GoodsState.block_input)
+    await message.answer('Генерація нового замовлення 👇', reply_markup=ReplyKeyboardRemove())
+    await message.answer("Оберіть категорію", reply_markup=categories_inl())
+
+
+@user_router.callback_query(Text(startswith="new_order_cat"))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    prefix, category = callback.data.split('|')
+    await state.set_state(GoodsState.block_input)
+    await state.update_data(category=category)
+    await callback.message.edit_text("🛍 Оберіть товар",
+                                     reply_markup=build_goods_with_price_inl(category))
+
+
+# @user_router.callback_query(Text(startswith="new_order_g"))
+# async def anon(callback: CallbackQuery, state: FSMContext):
+#     prefix, category = callback.data.split('|')
+#     await state.update_data(category=category)
+#     await callback.message.edit_text("Оберіть товар",
+#                                      reply_markup=build_goods_with_price_inl(category))
 
 
 @user_router.message(F.text == "🏠 Додати адрес")
@@ -62,16 +78,6 @@ async def addr(message: Message):
     addr = build_address_msg(user.address)
     await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 
-    # TODO: make adressupdatable
-
-"""
-    full_name: str
-    mobile_number: str
-    city: str
-    post_number: int
-    user: int
-"""
-
 
 @user_router.callback_query(F.data.in_(["full_name", "mobile_number", "city", "post_number"]))
 async def update_addr(callback: CallbackQuery, state: FSMContext):
@@ -84,8 +90,7 @@ async def update_addr(callback: CallbackQuery, state: FSMContext):
 
 # @user_router.message(F.text == "/test")
 # async def test(message: Message):
-#     order = get_order_by_id(1)
-#     msg = show_order(order)
+#     bot.his
 #     await message.answer(msg, parse_mode="MARKDOWN")
 
 

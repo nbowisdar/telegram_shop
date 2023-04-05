@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from config import categories
 from peewee import Model, CharField, IntegerField, FloatField, SqliteDatabase, \
     ForeignKeyField, BooleanField, TextField, DecimalField, DateTimeField
 from setup import BASE_DIR
@@ -21,6 +21,7 @@ class User(BaseModel):
 class Goods(BaseModel):
     name = CharField(max_length=100, unique=True)
     desc = TextField(null=True)
+    category = CharField(choices=categories)
     price = DecimalField(max_digits=10, decimal_places=2)
     photo = CharField(null=True)  # link to photo in tg
 
@@ -36,6 +37,7 @@ class Address(BaseModel):
 class Order(BaseModel):
     time_created = DateTimeField(default=datetime.now)
     ordered_goods = ForeignKeyField(Goods, backref="orders")
+    amount = IntegerField()
     user = ForeignKeyField(User, backref="orders")
     with_discount = BooleanField(default=False)
     note = CharField(null=True)

@@ -1,7 +1,9 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from src.database.crud.get import get_user_schema_by_id
+from config import categories
+from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
+from src.schemas import GoodsModel
 
 # from src.database.queries import get_all_accounts
 
@@ -58,11 +60,37 @@ kb_inline1 = [
 community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 
-def build_acc_btns() -> ReplyKeyboardMarkup:
-    # accounts = get_all_accounts()
-    accounts = []
-    builder = ReplyKeyboardBuilder()
-    for acc in accounts:
-        builder.add(KeyboardButton(text=acc.name))
-    builder.adjust(4)
-    return builder.as_markup(resize_keyboard=True)
+# def build_acc_btns() -> ReplyKeyboardMarkup:
+#     # accounts = get_all_accounts()
+#     accounts = []
+#     builder = ReplyKeyboardBuilder()
+#     for acc in accounts:
+#         builder.add(KeyboardButton(text=acc.name))
+#     builder.adjust(4)
+#     return builder.as_markup(resize_keyboard=True)
+
+cancel_inl = InlineKeyboardButton(text="❌ Скасувати", callback_data="cancel_order")
+
+
+def categories_inl() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    for cat in categories:
+        builder.button(
+            text=cat.capitalize(), callback_data=f"new_order_cat|{cat}"
+        )
+    builder.adjust(3)
+    builder.row(cancel_inl)
+    return builder.as_markup()
+
+
+def build_goods_with_price_inl(category: str) -> InlineKeyboardMarkup:
+    goods: list[GoodsModel] = get_goods_by_category(category.casefold())
+    builder = InlineKeyboardBuilder()
+    for g in goods:
+        builder.button(
+            text=f'{g.name}: Ціна - {g.price} грн.', callback_data=f"new_order_g|{g.name}"
+        )
+    builder.adjust(1)
+    builder.row(cancel_inl)
+    return builder.as_markup()
+

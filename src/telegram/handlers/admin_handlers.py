@@ -7,7 +7,8 @@ from src.database.queries import generate_new_code
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn
 from setup import admin_router
 from setup import bot
-from src.telegram.handlers.fsm_h.admin_fsm.goods.add import GoodsState
+from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
+from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import UpdateAddr
 
 
 @admin_router.message(F.text.in_(["/admin", "⬅️ На головну"]))
@@ -33,6 +34,12 @@ async def create_promo(message: Message):
 async def add_goods(message: Message, state: FSMContext):
     await message.answer("Введіть назву товару", reply_markup=admin_cancel_btn)
     await state.set_state(GoodsState.name)
+
+
+# @admin_router.message(F.text == "🔨 Оновити")
+# async def add_goods(message: Message, state: FSMContext):
+#     await message.answer("Введіть назву товару", reply_markup=admin_cancel_btn)
+#     await state.set_state(UpdateAddr.field)
 
 
 @admin_router.callback_query(Text(text="confirm"))
