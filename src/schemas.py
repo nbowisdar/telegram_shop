@@ -5,15 +5,20 @@ from pydantic import BaseModel
 from src.database.tables import Order
 
 
-class AddressModel(BaseModel):
+class Base(BaseModel):
+    class Config:
+        orm_mode = True
+
+
+class AddressModel(Base):
     full_name: str
     mobile_number: str
     city: str
     post_number: int
-    user: int
+    user_id: int
 
 
-class GoodsModel(BaseModel):
+class GoodsModel(Base):
     name: str
     desc: str
     category: str
@@ -21,16 +26,19 @@ class GoodsModel(BaseModel):
     photo: str
 
 
-class UserModel(BaseModel):
-    user_id: int
-    orders: list["OrderModel"]
-    address: AddressModel | None
-
-
-class OrderModel(BaseModel):
+class OrderModel(Base):
     ordered_goods: GoodsModel
     amount: int
-    user: UserModel
+    user: "UserModel"
     with_discount: bool
     time_created: datetime | None = None
     note: str | None = None
+
+
+class UserModel(Base):
+    user_id: int
+    orders: list[OrderModel]
+    address: AddressModel | None
+
+
+

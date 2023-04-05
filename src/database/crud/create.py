@@ -1,11 +1,13 @@
+from src.database.crud.get import update_user_addr_cache
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel
 
 
-def create_address(address: AddressModel, user_id: int):
-    user, created = User.get_or_create(user_id=user_id)
-    address['user'] = user
+def create_address(address: AddressModel):
+    user, created = User.get_or_create(user_id=address.user_id)
     user.address = Address.create(**address.dict())
+
+    update_user_addr_cache(address)
 
 
 def create_goods(goods: GoodsModel) -> bool:

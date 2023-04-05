@@ -64,10 +64,11 @@ async def set_name(message: Message, state: FSMContext):
         await message.reply("❌ Не вірний формат!", reply_markup=user_main_btn)
     else:
         await state.update_data(post_number=message.text)
+        await state.update_data(user_id=message.from_user.id)
         data = await state.get_data()
         data = AddressModel(**data)
         try:
-            create_address(data, message.from_user.id)
+            create_address(data)
             msg = "✅ Ви додали адресс!"
         except IntegrityError:
             msg = "🛑 Ви можете додати лише один адрес"
