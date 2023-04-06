@@ -32,14 +32,17 @@ def remove_user_from_cache(user_id):
 
 
 def get_user_schema_by_id(user_id: int) -> UserModel:
+    # print(users)
     if user_id in users.keys():
-        print(users[user_id])
         print("Took from cash!!)")
         return users[user_id]
     user, created = User.get_or_create(user_id=user_id)
     if created:
+        users[user_id] = UserModel.from_orm(user)
         return UserModel(user_id=user_id, orders=[], address=None)
     orders = [OrderModel.from_orm(order) for order in user.orders]
+    # for i in user.address:
+        # print(i)
     if user.address:
         # addr = AddressModel(**user.address[0].__data__)
         addr = AddressModel.from_orm(user.address.first())

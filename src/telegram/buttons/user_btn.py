@@ -32,6 +32,7 @@ addr_inline_fields = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Мобільний номер", callback_data="mobile_number")],
         [InlineKeyboardButton(text="Місто", callback_data="city")],
         [InlineKeyboardButton(text="НП відділення", callback_data="post_number")],
+        [InlineKeyboardButton(text="↩️ На головну", callback_data="user_main")]
     ]
 )
 
@@ -59,13 +60,11 @@ kb_inline1 = [
 
 community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
-
 ok_goods = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
-    InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|start")],
+     InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|start")],
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])
-
 
 cancel_inl_ord = InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")
 from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")
@@ -82,6 +81,10 @@ def categories_inl() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
+                   InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
+
+
 def build_amount_inl():
     buttons = [
         [
@@ -89,8 +92,7 @@ def build_amount_inl():
             InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
         ],
         [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
-        [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
-         InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
+        cancel_shortcut
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     return keyboard
@@ -107,3 +109,44 @@ def build_goods_with_price_inl(category: str) -> InlineKeyboardMarkup:
     builder.row(from_scratch_inl_ord, cancel_inl_ord)
     return builder.as_markup()
 
+
+def build_addr_inl() -> InlineKeyboardMarkup:
+    # if get_update_window:
+    first_row = [InlineKeyboardButton(text="✅ Так", callback_data="addr_confirmed"),
+                 InlineKeyboardButton(text="⚙️ Оновити адресс", callback_data="update_addr")]
+    # else:
+    #     first_row = [InlineKeyboardButton(text="👌 Продовжити", callback_data="reload_addr")]
+    return InlineKeyboardMarkup(inline_keyboard=[
+        first_row, cancel_shortcut
+    ])
+
+
+if_promo_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="✅ Так", callback_data="try_discount"),
+        InlineKeyboardButton(text="Ні (далі)➡️", callback_data="show_oder_details")
+    ],
+    cancel_shortcut
+])
+
+create_new_ordr_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="🛒 Створити новий заказ", callback_data="confirm_order")
+    ],
+    [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
+])
+
+
+# confirm_order_inl = InlineKeyboardMarkup(inline_keyboard=[
+#     [
+#         InlineKeyboardButton(text="💳 ", callback_data="confirm")
+#     ],
+#     cancel_shortcut
+# ])
+
+pay_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="💳 Я оплатив", callback_data="confirm_pay")
+    ],
+    cancel_shortcut
+])

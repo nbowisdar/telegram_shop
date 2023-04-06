@@ -29,8 +29,8 @@ class GoodsModel(Base):
 class OrderModel(Base):
     ordered_goods: GoodsModel
     amount: int
-    user: "UserModel"
-    with_discount: bool
+    # user: "UserModel"
+    with_discount: bool | None = None
     time_created: datetime | None = None
     note: str | None = None
 

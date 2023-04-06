@@ -13,8 +13,14 @@ from src.telegram.messages.user_msg import build_address_msg
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
 async def start(message: Message):
-    await message.answer("bot works",
+    await message.answer("Головна сторінка 🌞",
                          reply_markup=user_main_btn)
+
+
+@user_router.callback_query(Text("user_main"))
+async def start(callback: CallbackQuery):
+    await callback.message.delete()
+    await callback.message.answer("Головна сторінка 🌞", reply_markup=user_main_btn)
 
 
 @user_router.message(F.text == "🏠 Додати адрес")
@@ -46,7 +52,7 @@ async def addr(message: Message):
 async def update_addr(callback: CallbackQuery, state: FSMContext):
     await state.set_state(UpdateAddr.new_value)
     await state.update_data(field=callback.data)
-    await callback.message.reply("Введіть нове значання:")
+    await callback.message.reply("Введіть нове значання:", reply_markup=ReplyKeyboardRemove())
     await callback.answer()
     # await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 
