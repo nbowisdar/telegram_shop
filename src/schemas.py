@@ -41,4 +41,9 @@ class UserModel(Base):
     address: AddressModel | None
 
 
+class PromoCodeModel(Base):
+    code: str
+    max_use: int
+    discount_percent: int
+
 

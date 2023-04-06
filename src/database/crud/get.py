@@ -37,9 +37,11 @@ def get_user_schema_by_id(user_id: int) -> UserModel:
         print("Took from cash!!)")
         return users[user_id]
     user, created = User.get_or_create(user_id=user_id)
+    print()
     if created:
-        users[user_id] = UserModel.from_orm(user)
-        return UserModel(user_id=user_id, orders=[], address=None)
+        user_model = UserModel.from_orm(user_id=user_id, orders=[], address=None)
+        users[user_id] = user_model
+        return user_model
     orders = [OrderModel.from_orm(order) for order in user.orders]
     # for i in user.address:
         # print(i)

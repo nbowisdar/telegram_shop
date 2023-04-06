@@ -7,7 +7,7 @@ from aiogram.filters import Command, Text
 from aiogram import F
 
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
-from src.database.queries import check_promo
+from src.database.promo_queries import check_promo
 from src.schemas import AddressModel, OrderModel
 from src.telegram.buttons import *
 import decimal
@@ -37,6 +37,7 @@ class OrderState(StatesGroup):
     user_id = State()
     with_discount = State()
     note = State()
+    promo_code = State()
     block_input = State()
     current_msg = State()
     payment = State()
@@ -171,9 +172,8 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 
 
 @order_router.callback_query(Text("addr_confirmed"))
-async def anon(callback: CallbackQuery, state: FSMContext):
+async def has_promo(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("У вас є промокод?", reply_markup=if_promo_inl)
-
 
 
 @order_router.callback_query(Text("try_discount"))
@@ -185,13 +185,22 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 
 @order_router.message(OrderState.with_discount)
 async def anon(message: Message, state: FSMContext):
-    code = check_promo(message.text)
+    try:
+        code = check_promo(message.text, message.from_user.id)
+    except Exception as err:
+        data = await state.get_data()
+        await message.reply(str(err))
+        await data['current_msg'].answer("У вас є промокод?", reply_markup=if_promo_inl)
+        return
     await message.delete()
     data = await state.get_data()
     msg: Message = data["current_msg"]
     if code:
-        await msg.edit_text("✅ Вітаємо, ви додали промоко!",
-                            reply_markup=create_new_ordr_inl)
+        await state.update_data(promo_code=code)
+        await msg.edit_text("✅ Вітаємо, ви додали промокод!\n"
+                            f"      Діє знижка -{code.discount_percent} %",
+                            reply_markup=show_details)
+
     else:
         await msg.edit_text(f"{msg.text}\n\n❌ Код не дійсний!",
                             parse_mode="MARKDOWN", reply_markup=if_promo_inl)
@@ -204,8 +213,13 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
     goods = get_goods_by_name(data['goods_name'])
     amount = data.get("amount", 1)
     order = OrderModel(user=user, amount=amount, ordered_goods=goods)
-    msg = build_result_order_msg(order, user.address)
-    await state.update_data(payment=order.amount*order.ordered_goods.price)
+
+    payment = order.amount*order.ordered_goods.price
+    if data['promo_code']:
+        payment -= round(payment / 100 * data['promo_code'].discount_percent, 2)
+    msg = build_result_order_msg(order, user.address, float(payment))
+
+    await state.update_data(payment=payment)
     await callback.message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=create_new_ordr_inl)
 
 

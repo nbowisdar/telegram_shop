@@ -1,12 +1,13 @@
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
-from src.database.queries import generate_new_code
+from src.database.promo_queries import generate_new_code
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn
 from setup import admin_router
 from setup import bot
+from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import UpdateAddr
 
@@ -17,12 +18,12 @@ async def main(message: Message):
                          reply_markup=admin_main_kb)
 
 
-@admin_router.message(F.text == '🔑 Створити новий промокод')
-async def create_promo(message: Message):
-    new_cod = generate_new_code()
-    await message.reply(f'Ви створили новий промокод - `{new_cod}`',
-                        reply_markup=admin_main_kb,
-                        parse_mode="MARKDOWN")
+# @admin_router.message(F.text == '🔑 Створити новий промокод')
+# async def create_promo(message: Message):
+#     new_cod = generate_new_code()
+#     await message.reply(f'Ви створили новий промокод - `{new_cod}`',
+#                         reply_markup=admin_main_kb,
+#                         parse_mode="MARKDOWN")
 
 
 @admin_router.message(F.text == '🛍 Товари')
@@ -40,6 +41,13 @@ async def add_goods(message: Message, state: FSMContext):
 # async def add_goods(message: Message, state: FSMContext):
 #     await message.answer("Введіть назву товару", reply_markup=admin_cancel_btn)
 #     await state.set_state(UpdateAddr.field)
+
+
+@admin_router.message(F.text == "🔑 Створити новий промокод")
+async def new_code(message: Message, state: FSMContext):
+    await state.set_state(PromoCodeState.max_use)
+    await message.answer("Введіть число, скільки разів можно використати цей промокод",
+                         reply_markup=ReplyKeyboardRemove())
 
 
 @admin_router.callback_query(Text(text="confirm"))

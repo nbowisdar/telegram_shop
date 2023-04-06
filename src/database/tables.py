@@ -34,22 +34,38 @@ class Address(BaseModel):
     user = ForeignKeyField(User, unique=True, backref="address")
 
 
+order_status = [("created", "🛒 Створенний"),
+                ("wait_confirm", "⏳ Очікує підтвердження"),
+                ("confirmed", "✅ Підтвердженно"),
+                ("canceled", "🛑 Скасованно"),
+                ("executed", "🎉 Виконанно")]
+
+
 class Order(BaseModel):
     time_created = DateTimeField(default=datetime.now)
     ordered_goods = ForeignKeyField(Goods, backref="orders")
     amount = IntegerField()
     user = ForeignKeyField(User, backref="orders")
-    with_discount = BooleanField(default=False)
+    discount = IntegerField(default=0)
+    # total = DecimalField(max_digits=10, decimal_places=2)
+
+    status = CharField(choices=order_status)
     note = CharField(null=True)
 
 
 class PromoCode(BaseModel):
     code = CharField(unique=True)
-    count_of_use = IntegerField(default=0)
+    max_use = IntegerField(default=10000)
+    discount_percent = IntegerField(default=10)
+
+
+class UserCode(BaseModel):
+    user = ForeignKeyField(User, backref="codes")
+    code = ForeignKeyField(PromoCode, backref="users")
 
 
 def create_table():
-    tables = [Order, PromoCode, User, Address, Goods]
+    tables = [Order, PromoCode, User, Address, Goods, UserCode]
     db.create_tables(tables)
 
 

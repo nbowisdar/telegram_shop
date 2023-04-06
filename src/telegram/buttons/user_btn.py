@@ -136,13 +136,10 @@ create_new_ordr_inl = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])
 
-
-# confirm_order_inl = InlineKeyboardMarkup(inline_keyboard=[
-#     [
-#         InlineKeyboardButton(text="💳 ", callback_data="confirm")
-#     ],
-#     cancel_shortcut
-# ])
+show_details = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="🔍 Перевірити замовлення", callback_data="show_oder_details")]
+]
+)
 
 pay_inl = InlineKeyboardMarkup(inline_keyboard=[
     [

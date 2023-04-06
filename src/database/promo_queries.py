@@ -1,6 +1,11 @@
-from src.database.tables import db, Order, PromoCode
+from peewee import IntegrityError
+
+from src.database.tables import db, Order, PromoCode, User
 import string
 import random
+
+from src.schemas import PromoCodeModel
+
 
 # from src.schemas import AccountModel, OrderModel
 
@@ -14,21 +19,35 @@ def _generate_promo_code(num_char: int) -> str:
     return code[0:4] + "_" + code[4:]
 
 
-def generate_new_code(num_char=8) -> str:
+def generate_new_code(*, max_use=10000, discount_percent=10, num_char=8) -> PromoCodeModel:
     code = _generate_promo_code(num_char)
-    PromoCode.create(code=code)
-    print(code)
-    return code
+    while True:
+        try:
+            code = PromoCodeModel(code=code,
+                                  max_use=max_use,
+                                  discount_percent=discount_percent)
+            PromoCode.create(**code.dict())
+            print(code.code)
+            return code
+        except IntegrityError:
+            pass
 
 
-def check_promo(code: str, incr_amount=False) -> str | None:
+def check_promo(code: str, user_id: int, use=False) -> PromoCodeModel:
     promo = PromoCode.get_or_none(PromoCode.code == code)
     if not promo:
-        return
-    if incr_amount:
-        promo.count_of_use += 1
+        raise Exception("🛑 Такого промокода не існує!")
+    elif promo.max_use <= 0:
+        raise Exception("🛑 Цей промокод більше неможно використовувати!")
+    user = User.get(user_id=user_id)
+    x = [code.code for code in user.codes]
+    print(x)
+    if code in [code.code for code in user.codes]:
+        raise Exception("🛑 Ви вже використовували цей промокод!")
+    if use:
+        promo.max_use += 1
         promo.save()
-    return code
+    return PromoCodeModel.from_orm(promo)
 
 #
 # def get_all_accounts() -> list[AccountModel]:

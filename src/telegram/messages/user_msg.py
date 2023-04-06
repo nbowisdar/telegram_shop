@@ -21,15 +21,15 @@ def build_goods_full_info(g: GoodsModel) -> str:
            f"Опис товару:\n_{g.desc}_"
 
 
-def build_result_order_msg(order: OrderModel, address: AddressModel) -> str:
+def build_result_order_msg(order: OrderModel, address: AddressModel, total: float) -> str:
     return f"_Замовлення_:\n" \
            f"Товар - {order.ordered_goods.name}\n" \
            f"Кількість - {order.amount}\n" \
-           f"Ціна - {order.ordered_goods.price}\n\n" \
+           f"Ціна - {order.ordered_goods.price} ₴\n\n" \
            f"" \
            f"_Адрес доставки_:\n" \
            f"Повне ім'я - *{address.full_name}*\n" \
            f"Мобільний - *{address.mobile_number}*\n" \
            f"Місто - *{address.city}*\n" \
            f"Номер відділення НП - *{address.post_number}*\n\n" \
-           f"_До сплати_ - `{order.amount*order.ordered_goods.price}` ₴ \n\n" \
+           f"_До сплати_ - `{total}` ₴ \n\n" \
