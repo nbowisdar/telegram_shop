@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 from aiogram import F
 
+from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import check_promo
 from src.schemas import AddressModel, OrderModel
@@ -40,7 +41,8 @@ class OrderState(StatesGroup):
     promo_code = State()
     block_input = State()
     current_msg = State()
-    payment = State()
+    total = State()
+    discount = State()
 
 
 @order_router.message(OrderState.block_input)
@@ -52,7 +54,8 @@ async def new_order(message: Message):
 async def new_order(message: Message, state: FSMContext):
     await state.set_state(OrderState.block_input)
     data = await state.get_data()
-    # print(data)
+    await state.update_data(amount=1)
+    await state.update_data(discount=0)
     await state.update_data(user_id=(data.get("user_id", message.from_user.id)))
     msg = await message.answer('Генерація нового замовлення 👇', reply_markup=ReplyKeyboardRemove())
     # data = await state.get_data()
@@ -197,6 +200,7 @@ async def anon(message: Message, state: FSMContext):
     msg: Message = data["current_msg"]
     if code:
         await state.update_data(promo_code=code)
+        await state.update_data(discount=code.discount_percent)
         await msg.edit_text("✅ Вітаємо, ви додали промокод!\n"
                             f"      Діє знижка -{code.discount_percent} %",
                             reply_markup=show_details)
@@ -212,27 +216,37 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     goods = get_goods_by_name(data['goods_name'])
     amount = data.get("amount", 1)
-    order = OrderModel(user=user, amount=amount, ordered_goods=goods)
+    # await state.update_data()
 
-    payment = order.amount*order.ordered_goods.price
-    if data['promo_code']:
-        payment -= round(payment / 100 * data['promo_code'].discount_percent, 2)
-    msg = build_result_order_msg(order, user.address, float(payment))
+    # disc_percent = data['promo_code'].get("discount_percent", 0)
 
-    await state.update_data(payment=payment)
+    order = OrderModel(user_id=user.user_id,
+                       amount=amount,
+                       ordered_goods=goods,
+                       total=0)
+
+    total = amount * goods.price
+    if 'promo_code' in data.keys():
+        disc_percent = data['promo_code']["discount_percent"]
+        total -= round(total / 100 * disc_percent, 2)
+        order.total = total
+        order.discount = disc_percent
+
+    msg = build_result_order_msg(order, user.address, float(total))
+
+    await state.update_data(total=total)
     await callback.message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=create_new_ordr_inl)
 
 
 @order_router.callback_query(Text("confirm_order"))
 async def anon(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-
-    # create_new_order()
+    create_new_order(data)
 
     msg = f"Вітаємо, ви створили нове замовлення!\n" \
           f"Будь ласка здейсніть оплату.\n" \
           f"На карту `{card}`\n" \
-          f"У розмірі - `{data['payment']}` ₴\n" \
+          f"У розмірі - `{data['total']}` ₴\n" \
           f"Після чого натисніть - *Оплатив*"
     await callback.message.edit_text(msg, reply_markup=pay_inl, parse_mode="MARKDOWN")
 
@@ -246,5 +260,5 @@ async def anon(callback: CallbackQuery, state: FSMContext):
           "Та після перевірки оплати товар буде ваи відправленно." \
           "Якщо залишилися питання, ви завжди можете написати нам перший." \
           "П.с Впевніться що вам можуть писати першими (якщо з являться уточнення з нашої сторони)"
-    msg_anon = await callback.message.answer("🌞", reply_markup=user_main_btn)
+    await callback.message.answer("🌞🚀", reply_markup=user_main_btn)
     await callback.message.edit_text(msg)

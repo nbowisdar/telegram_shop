@@ -1,5 +1,6 @@
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel
+from loguru import logger
 
 cat_name = str
 user_id = int
@@ -32,14 +33,12 @@ def remove_user_from_cache(user_id):
 
 
 def get_user_schema_by_id(user_id: int) -> UserModel:
-    # print(users)
     if user_id in users.keys():
         print("Took from cash!!)")
         return users[user_id]
     user, created = User.get_or_create(user_id=user_id)
-    print()
     if created:
-        user_model = UserModel.from_orm(user_id=user_id, orders=[], address=None)
+        user_model = UserModel(user_id=user_id, orders=[], address=None)
         users[user_id] = user_model
         return user_model
     orders = [OrderModel.from_orm(order) for order in user.orders]
@@ -72,7 +71,14 @@ def get_goods_by_category(category: str) -> list[GoodsModel]:
     if category in cat_goods.keys():
         return cat_goods[category]
 
+    # print('75 get')
     goods = Goods.select().where(Goods.category == category)
-    resp = [GoodsModel(**g.__data__) for g in goods]
+    resp = [GoodsModel.from_orm(g) for g in goods]
     cat_goods[category] = resp
     return resp
+
+
+def update_goods_cache(goods: GoodsModel):
+    goods_list = cat_goods.get(goods.category, [])
+    goods_list.append(goods)
+    logger.info(f"cached - {goods.name}")

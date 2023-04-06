@@ -47,9 +47,9 @@ class Order(BaseModel):
     amount = IntegerField()
     user = ForeignKeyField(User, backref="orders")
     discount = IntegerField(default=0)
-    # total = DecimalField(max_digits=10, decimal_places=2)
+    total = DecimalField(max_digits=10, decimal_places=2)
 
-    status = CharField(choices=order_status)
+    status = CharField(choices=order_status, default=order_status[0])
     note = CharField(null=True)
 
 

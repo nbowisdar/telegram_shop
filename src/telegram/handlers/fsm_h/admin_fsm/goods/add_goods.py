@@ -8,6 +8,7 @@ from aiogram.types import Message, CallbackQuery
 
 from setup import admin_router
 from src.database.crud.create import create_goods
+from src.database.crud.get import update_goods_cache
 from src.schemas import GoodsModel
 from src.telegram.buttons import admin_main_kb, build_cat_kb
 
@@ -80,9 +81,11 @@ async def set_name(message: Message, state: FSMContext):
         await state.update_data(photo=message.photo[-1].file_id)
         await message.delete()
         data = await state.get_data()
-        created = create_goods(GoodsModel(**data))
+        goods_model = GoodsModel(**data)
+        created = create_goods(goods_model)
         if created:
             await message.answer("✅ Ви додали новий товар!", reply_markup=admin_main_kb)
+            update_goods_cache(goods_model)
         else:
             await message.answer("❌ Помилка\nСкорішь за все такий товар вже існує!", reply_markup=admin_main_kb)
 

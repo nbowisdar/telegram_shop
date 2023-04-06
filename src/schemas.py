@@ -29,10 +29,15 @@ class GoodsModel(Base):
 class OrderModel(Base):
     ordered_goods: GoodsModel
     amount: int
-    # user: "UserModel"
-    with_discount: bool | None = None
+    user_id: int
+    discount: int = 0
+    total: decimal.Decimal
     time_created: datetime | None = None
     note: str | None = None
+
+
+# def from_dict_to_order_model(data: dict):
+
 
 
 class UserModel(Base):

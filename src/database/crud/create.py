@@ -1,18 +1,32 @@
 from src.database.crud.get import update_user_addr_cache
 from src.database.tables import *
-from src.schemas import AddressModel, GoodsModel
+from src.schemas import *
 
 
 def create_address(address: AddressModel):
     user, created = User.get_or_create(user_id=address.user_id)
     user.address = Address.create(**address.dict())
-
     update_user_addr_cache(address)
 
 
 def create_goods(goods: GoodsModel) -> bool:
     g, created = Goods.get_or_create(**goods.dict())
     return created
+
+
+def create_new_order(data: dict) -> OrderModel:
+    goods = Goods.get(name=data['goods_name'])
+    # promo_code: PromoCodeModel = data['promo_code']
+    order = Order.create(
+        amount=data['amount'],
+        discount=data["discount"],
+        total=data['total'],
+        user=data['user_id'],
+        ordered_goods=goods,
+    )
+    # print('before')
+    return OrderModel.from_orm(order)
+
 
 def tests():
     """
