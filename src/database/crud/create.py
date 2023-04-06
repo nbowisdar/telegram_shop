@@ -14,10 +14,10 @@ def create_goods(goods: GoodsModel) -> bool:
     return created
 
 
-def create_new_order(data: dict) -> OrderModel:
+def create_new_order(data: dict) -> Order:
     goods = Goods.get(name=data['goods_name'])
     # promo_code: PromoCodeModel = data['promo_code']
-    order = Order.create(
+    return Order.create(
         amount=data['amount'],
         discount=data["discount"],
         total=data['total'],
@@ -25,7 +25,7 @@ def create_new_order(data: dict) -> OrderModel:
         ordered_goods=goods,
     )
     # print('before')
-    return OrderModel.from_orm(order)
+    # return OrderModel.from_orm(order)
 
 
 def tests():

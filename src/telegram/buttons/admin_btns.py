@@ -28,4 +28,9 @@ admin_goods_kb = ReplyKeyboardMarkup(
 "Inline keyboards bellow"
 
 
-
+confirm_order_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="✅ Підтвердити", callback_data="order_confirmed"),
+        InlineKeyboardButton(text="🛑 Відхилити", callback_data="order_declined")
+    ],
+])

@@ -9,6 +9,7 @@ from aiogram import F
 from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import check_promo
+from src.database.tables import order_status
 from src.schemas import AddressModel, OrderModel
 from src.telegram.buttons import *
 import decimal
@@ -20,6 +21,7 @@ from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressStat
 # from src.telegram.handlers.user_handlers import order_router
 from src.telegram.buttons import user_main_btn
 from src.telegram.messages.user_msg import build_goods_full_info, build_address_msg, build_result_order_msg
+from src.telegram.utils.nitifications import send_confirmation_to_admin
 
 """
 class OrderModel(NamedTuple):
@@ -36,6 +38,7 @@ class OrderState(StatesGroup):
     goods_name = State()
     amount = State()
     user_id = State()
+    username = State()
     with_discount = State()
     note = State()
     promo_code = State()
@@ -43,6 +46,7 @@ class OrderState(StatesGroup):
     current_msg = State()
     total = State()
     discount = State()
+    order_msg = State()
 
 
 @order_router.message(OrderState.block_input)
@@ -57,6 +61,7 @@ async def new_order(message: Message, state: FSMContext):
     await state.update_data(amount=1)
     await state.update_data(discount=0)
     await state.update_data(user_id=(data.get("user_id", message.from_user.id)))
+    await state.update_data(username=(data.get("username", message.from_user.username)))
     msg = await message.answer('Генерація нового замовлення 👇', reply_markup=ReplyKeyboardRemove())
     # data = await state.get_data()
     # print(data)
@@ -233,6 +238,7 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
         order.discount = disc_percent
 
     msg = build_result_order_msg(order, user.address, float(total))
+    await state.update_data(order_msg=msg)
 
     await state.update_data(total=total)
     await callback.message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=create_new_ordr_inl)
@@ -241,7 +247,8 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
 @order_router.callback_query(Text("confirm_order"))
 async def anon(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    create_new_order(data)
+    order = create_new_order(data)
+    await state.update_data(order=order)
 
     msg = f"Вітаємо, ви створили нове замовлення!\n" \
           f"Будь ласка здейсніть оплату.\n" \
@@ -253,8 +260,16 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 
 @order_router.callback_query(Text("confirm_pay"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-    # data = await state.get_data()
-    # await send_confirmation_to_admin()
+    data = await state.get_data()
+    order = data['order']
+    order.status = order_status[1]
+    order.save()
+    print(order.status)
+    msg_for_admin = f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
+                    f"\nЗробив нове замовлення:\n\n{data['order_msg']}\n" \
+                    f"Статус - *{order.status[1]}*"
+    await send_confirmation_to_admin(msg_for_admin)
+
     msg = "Дякуємо за замовлення." \
           "Усю інформацію по вашому заказу буде перевіренно" \
           "Та після перевірки оплати товар буде ваи відправленно." \
