@@ -152,5 +152,5 @@ pay_inl = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text="💳 Я оплатив", callback_data="confirm_pay")
     ],
-    cancel_shortcut
+    [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")]
 ])

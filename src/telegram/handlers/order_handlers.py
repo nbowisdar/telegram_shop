@@ -9,7 +9,7 @@ from aiogram import F
 from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import check_promo
-from src.database.tables import order_status, type_payment
+from src.database.tables import order_status, type_payment, Order
 from src.schemas import AddressModel, OrderModel
 from src.telegram.buttons import *
 import decimal
@@ -266,8 +266,8 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
 @order_router.callback_query(Text("confirm_order"))
 async def anon(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    order = create_new_order(data)
-    await state.update_data(order=order)
+
+    # await state.update_data(order=order)
     print(data['type_payment'])
 
     if data['type_payment'] == "now":  # if user choose to pay online
@@ -284,31 +284,27 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 @order_router.callback_query(Text("confirm_pay"))
 async def confirm_payment(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    order = data['order']
+    order: Order = create_new_order(data)
     # order.status = order_status[1]
-    order.status = "wait_confirm"
+    order.status = "wait_confirmation"
     order.save()
-    print(order.status)
+    data['order_id'] = order.id
     await notify_admins(data)
 
-    msg = "Дякуємо за замовлення." \
+    msg = "Дякуємо!\n" \
+          f"Номер вашого замовлення - `{order.id}`\n\n" \
           "Усю інформацію по вашому заказу буде перевіренно" \
           "Якщо залишилися питання, ви завжди можете написати нам перший." \
           "П.с Переконайтеся що вам можуть писати першими (якщо з'являться уточнення з нашої сторони)"
-    await callback.message.answer("🌞🚀", reply_markup=user_main_btn)
-    await callback.message.edit_text(msg)
+    await callback.message.answer("🌞🚀", reply_markup=user_main_btn, )
+    await callback.message.edit_text(msg, parse_mode="MARKDOWN")
     await state.clear()
 
 
-
 async def notify_admins(data: dict):
-    # print(data["order_status"])
-    # print(order_status[1])
-    msg_for_admin = f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
-                    f"\nЗробив нове замовлення:\n\n{data['order_msg']}\n" \
-                    f"Статус - *{order_status['wait_confirm']}*"
+    msg_for_admin = f"Нове замовлення - № `{data['order_id']}`\n" \
+                    f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
+                    f"\n\n{data['order_msg']}\n" \
+                    f"Статус - *{order_status['wait_confirmation']}*"
     await send_confirmation_to_admin(msg_for_admin)
 
-
-# async def save_order_in_db(data: dict):
-#     pass

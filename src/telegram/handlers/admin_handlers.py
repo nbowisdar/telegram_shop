@@ -1,8 +1,11 @@
+import re
+
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
+from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn
 from setup import admin_router
@@ -50,22 +53,37 @@ async def new_code(message: Message, state: FSMContext):
                          reply_markup=ReplyKeyboardRemove())
 
 
-@admin_router.callback_query(Text(text="confirm"))
-async def get_new_order(query: CallbackQuery):
-    msg = f"{query.message.text}\n✅Підтвердженно✅"
-    user_id = query.message.text.split(" ")[1]
-    await query.message.edit_text(msg)
-    t = "Ваше замовлення підтверджено!\n Протягом години з вами зв'яжеться наш менеджер."
-    await bot.send_message(user_id, t)
-    await query.answer()
+@admin_router.callback_query(Text(startswith="order_waiting"))
+async def get_new_order(callback: CallbackQuery):
+    _, action = callback.data.split("|")
+    pattern = r"Id - (\d+)"
+    match = re.search(pattern, callback.message.text)
+    user_id = match.group(1)
+    order_id = re.search("№ (\d+)", callback.message.text).group(1)
+
+    if action == "confirm":
+        msg = "✅ Підтвердженно"
+        ans = "✅ Ваше замовлення підтверджено!\n"
+        update_order_status(order_id, "confirmed")
+
+    else:
+        ans = "❌ Ваше замовлення було відхилено\n" \
+              "Якщо у вас залишилися питання" \
+              " ви можете звернутися до нашої підтримку."
+        msg = "❌ Відхилено"
+        update_order_status(order_id, "canceled")
 
 
-@admin_router.callback_query(Text(text="cancel"))
-async def get_new_order(query: CallbackQuery):
-    msg = f"{query.message.text}\n❌Відхилено❌"
-    user_id = query.message.text.split(" ")[1]
-    await query.message.edit_text(msg)
-    t = "Ваше замовлення було відхилено, якщо у вас залишилися питання\n" \
-         "Ви можете звернутися на нашу підтримку."
-    await bot.send_message(user_id, t)
-    await query.answer()
+    await callback.message.edit_text(msg)
+    await bot.send_message(user_id, ans)
+    await callback.answer()
+
+
+# @admin_router.callback_query(Text(text="cancel"))
+# async def get_new_order(query: CallbackQuery):
+#     msg = f"{query.message.text}\n❌ Відхилено"
+#     user_id = query.message.text.split(" ")[1]
+#     await query.message.edit_text(msg)
+#
+#     await bot.send_message(user_id, t)
+#     await query.answer()
