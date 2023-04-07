@@ -14,20 +14,20 @@ from src.telegram.buttons import admin_main_kb, build_cat_kb
 
 
 class PromoCodeState(StatesGroup):
-    max_use = State()
+    max_use_left = State()
     discount_percent = State()
     code = State()
 
 
-@admin_router.message(PromoCodeState.max_use)
+@admin_router.message(PromoCodeState.max_use_left)
 async def anon(message: Message, state: FSMContext):
-    max_use = message.text
-    if not max_use.isdigit():
+    max_use_left = message.text
+    if not max_use_left.isdigit():
         await state.clear()
         await message.reply("❌ Повинно бути число!", reply_markup=admin_main_kb)
         return
     await message.answer("Введіть сумму знижки")
-    await state.update_data(max_use=int(max_use))
+    await state.update_data(max_use_left=int(max_use_left))
     await state.set_state(PromoCodeState.discount_percent)
 
 
@@ -45,8 +45,8 @@ async def anon(message: Message, state: FSMContext):
 
 
 async def generate(message: Message, data: dict):
-    code = generate_new_code(max_use=data['max_use'], discount_percent=data['discount_percent'])
+    code = generate_new_code(max_use_left=data['max_use_left'], discount_percent=data['discount_percent'])
     await message.answer(f"Вітаємо!\nВи створили новий промокод - `{code.code}`\n"
-                         f"Можно використати - *{code.max_use}* разів\n"
+                         f"Можно використати - *{code.max_use_left}* разів\n"
                          f"Надає скидку - *{code.discount_percent}* %",
                          reply_markup=admin_main_kb, parse_mode="MARKDOWN")

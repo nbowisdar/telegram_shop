@@ -1,12 +1,16 @@
 from datetime import datetime
-from config import categories
+from config import categories, buy_variants
 from peewee import Model, CharField, IntegerField, FloatField, SqliteDatabase, \
     ForeignKeyField, BooleanField, TextField, DecimalField, DateTimeField
 from setup import BASE_DIR
 import os
 import decimal
 
+from src.schemas import AmountPrice
+
 db = SqliteDatabase(os.path.join(BASE_DIR, "app.db"))
+
+buy_variants_struct = [AmountPrice(var[0], var[1]) for var in buy_variants]
 
 
 class BaseModel(Model):
@@ -62,7 +66,7 @@ class Order(BaseModel):
 
 class PromoCode(BaseModel):
     code = CharField(unique=True)
-    max_use = IntegerField(default=10000)
+    max_use_left = IntegerField(default=10000)
     discount_percent = IntegerField(default=10)
 
 

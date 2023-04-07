@@ -85,7 +85,7 @@ cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callbac
                    InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 
 
-def build_amount_inl():
+def build_amount_disc_inl():
     buttons = [
         [
             InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),

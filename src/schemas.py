@@ -1,8 +1,8 @@
 # from dataclasses import dataclass
+from typing import NamedTuple
 import decimal
 from datetime import datetime
 from pydantic import BaseModel
-from src.database.tables import Order
 
 
 class Base(BaseModel):
@@ -26,13 +26,19 @@ class GoodsModel(Base):
     photo: str
 
 
+class AmountPrice(NamedTuple):
+    amount: int
+    price: decimal.Decimal
+
+
 class OrderModel(Base):
     ordered_goods: GoodsModel
-    amount: int
     user_id: int
     discount: int = 0
     total: decimal.Decimal
     type_payment: str
+    amount: int = None
+    amount_disc: AmountPrice = None
     time_created: datetime | None = None
     note: str | None = None
 
@@ -49,7 +55,7 @@ class UserModel(Base):
 
 class PromoCodeModel(Base):
     code: str
-    max_use: int
+    max_use_left: int
     discount_percent: int
 
 

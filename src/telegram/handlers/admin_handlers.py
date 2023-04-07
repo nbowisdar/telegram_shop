@@ -48,7 +48,7 @@ async def add_goods(message: Message, state: FSMContext):
 
 @admin_router.message(F.text == "🔑 Створити новий промокод")
 async def new_code(message: Message, state: FSMContext):
-    await state.set_state(PromoCodeState.max_use)
+    await state.set_state(PromoCodeState.max_use_left)
     await message.answer("Введіть число, скільки разів можно використати цей промокод",
                          reply_markup=ReplyKeyboardRemove())
 
