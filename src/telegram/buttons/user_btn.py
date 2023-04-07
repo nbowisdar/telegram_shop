@@ -87,11 +87,12 @@ cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callbac
 
 def build_amount_disc_inl():
     buttons = [
+        [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
         [
             InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),
             InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
         ],
-        [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
+        [InlineKeyboardButton(text="✍️ Інше значення", callback_data="new_order_num|other")],
         cancel_shortcut
     ]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)

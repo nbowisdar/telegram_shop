@@ -117,14 +117,41 @@ async def update_num_text(*, message: Message,
         await message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=build_amount_disc_inl())
 
 
+@order_router.message(OrderState.amount_disc)
+async def custom_amount(message: Message, state: FSMContext):
+    try:
+        custom_var = None
+        amount = int(message.text)
+        for var in buy_variants_struct:
+            if amount < var.amount:
+                custom_var = AmountPrice(amount, var.price)
+
+        if not custom_var:
+            custom_var = AmountPrice(amount, buy_variants_struct[-1].price)
+        await state.update_data(amount_disc=custom_var)
+        await state.set_state(OrderState.block_input)
+    except TypeError:
+        await message.reply("🛑 Повинно бути число!")
+        await state.clear()
+
+    # msg = await message.answer(".")
+    data = await state.get_data()
+    await select_address(data['current_msg'], state)
+    await message.delete()
+
+
 @order_router.callback_query(Text(startswith="new_order_num"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-
     prefix, action = callback.data.split('|')
     data = await state.get_data()
 
-    variants_len = len(buy_variants_struct)
+    if action == "other":
+        msg = await callback.message.edit_text("Введіть потрібну кількість")
+        await state.update_data(current_msg=msg)
+        await state.set_state(OrderState.amount_disc)
+        return
 
+    variants_len = len(buy_variants_struct)
     amount_disc = data.get("amount_disc", buy_variants_struct[0])
 
     name = data['goods_name']
@@ -167,22 +194,33 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 async def select_address(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     user = get_user_schema_by_id(data['user_id'])
-    if user.address:
-        msg = "Бажаєте викорастити цей адрес?\n\n" + build_address_msg(user.address)
-        await callback.message.edit_text(msg, parse_mode="MARKDOWN",
-                                         reply_markup=build_addr_inl())
+
+    if isinstance(callback, Message):
+        if user.address:
+            print(callback)
+            print(callback.text)
+            msg = "Бажаєте викорастити цей адрес?\n\n" + build_address_msg(user.address)
+            await callback.edit_text(msg, parse_mode="MARKDOWN",
+                                             reply_markup=build_addr_inl())
+        else:
+            await state.clear()
+            msg = "Будьласка, спочатку додайте ваш адрес."
+            # await callback.edit_text(msg)
+            await callback.delete()
+            await state.set_state(AddressState.full_name)
+            await callback.answer(msg+"\n\nВведіть ваше повне ім'я", reply_markup=cancel_btn)
     else:
-        await state.clear()
-        msg = "Будьласка, спочатку додайте ваш адрес."
-        # await callback.message.edit_text(msg)
-        await callback.message.delete()
-        await state.set_state(AddressState.full_name)
-        await callback.message.answer(msg+"\n\nВведіть ваше повне ім'я", reply_markup=cancel_btn)
-    # prefix, category = callback.data.split('|')
-    # await state.set_state(OrderState.block_input)
-    # await state.update_data(category=category)
-    # await callback.message.edit_text("🛍 Оберіть товар",
-    #                                  reply_markup=build_goods_with_price_inl(category))
+        if user.address:
+            msg = "Бажаєте викорастити цей адрес?\n\n" + build_address_msg(user.address)
+            await callback.message.edit_text(msg, parse_mode="MARKDOWN",
+                                             reply_markup=build_addr_inl())
+        else:
+            await state.clear()
+            msg = "Будьласка, спочатку додайте ваш адрес."
+            # await callback.message.edit_text(msg)
+            await callback.message.delete()
+            await state.set_state(AddressState.full_name)
+            await callback.message.answer(msg + "\n\nВведіть ваше повне ім'я", reply_markup=cancel_btn)
 
 
 # TODO: can be better with choosing address
@@ -198,12 +236,12 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 
 @order_router.callback_query(Text("addr_confirmed"))
 async def has_promo(callback: CallbackQuery, state: FSMContext):
+    await state.update_data(current_msg=callback.message)
     await callback.message.edit_text("У вас є промокод?", reply_markup=if_promo_inl)
 
 
 @order_router.callback_query(Text("try_discount"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(current_msg=callback.message)
     await callback.message.edit_text("Відправте промокод ✍️")
     await state.set_state(OrderState.with_discount)
 
@@ -319,7 +357,8 @@ async def confirm_payment(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(msg, parse_mode="MARKDOWN")
     await state.clear()
 
-    apply_promo_code(data['promo_code'].code, data['user_id'], True)
+    if "promo_code" in data.keys():
+        apply_promo_code(data['promo_code'].code, data['user_id'], True)
 
 
 async def notify_admins(data: dict):
