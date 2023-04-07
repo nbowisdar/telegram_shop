@@ -218,7 +218,7 @@ async def anon(message: Message, state: FSMContext):
 @order_router.callback_query(Text("type_payment"))
 async def choose_payment(obj):
     if isinstance(obj, Message):
-        await obj.edit_text("Оберіть тип доставки", reply_markup=type_delivery_inl)
+        await obj.edit_text("Оберіть тип оплати", reply_markup=type_delivery_inl)
     else:
         await obj.message.edit_text("Оберіть тип доставки", reply_markup=type_delivery_inl)
 
@@ -226,13 +226,10 @@ async def choose_payment(obj):
 
 @order_router.callback_query(Text(startswith="payment"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-    _, value = callback.data.split("|")
-    if value in type_payment[0]:
-        v = type_payment[0]
-    else:
-        v = type_payment[1]
-    await state.update_data(type_payment=v)
-    await callback.message.edit_text(f"Тип оплати - *{v[1]}*",
+    _, key = callback.data.split("|")
+
+    await state.update_data(type_payment=key)
+    await callback.message.edit_text(f"Тип оплати - *{type_payment[key]}*",
                                      parse_mode="MARKDOWN",
                                      reply_markup=show_details)
 
@@ -248,7 +245,9 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
                        amount=amount,
                        ordered_goods=goods,
                        total=0,
-                       type_payment=data['type_payment'][1])
+                       type_payment=type_payment.get(
+                           data['type_payment'])
+                       )
 
     total = amount * goods.price
     if 'promo_code' in data.keys():
@@ -271,7 +270,7 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     await state.update_data(order=order)
     print(data['type_payment'])
 
-    if data['type_payment'] == type_payment[0]:  # if user choose to pay online
+    if data['type_payment'] == "now":  # if user choose to pay online
         msg = f"Вітаємо, ви створили нове замовлення!\n" \
               f"Будь ласка здейсніть оплату.\n" \
               f"На карту `{card}`\n" \
@@ -307,7 +306,7 @@ async def notify_admins(data: dict):
     # print(order_status[1])
     msg_for_admin = f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
                     f"\nЗробив нове замовлення:\n\n{data['order_msg']}\n" \
-                    f"Статус - *{order_status[1]}*"
+                    f"Статус - *{order_status['wait_confirm']}*"
     await send_confirmation_to_admin(msg_for_admin)
 
 
