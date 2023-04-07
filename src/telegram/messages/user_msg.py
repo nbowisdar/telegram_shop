@@ -32,4 +32,4 @@ def build_result_order_msg(order: OrderModel, address: AddressModel, total: floa
            f"Мобільний - *{address.mobile_number}*\n" \
            f"Місто - *{address.city}*\n" \
            f"Номер відділення НП - *{address.post_number}*\n\n" \
-           f"_До сплати_ - `{total}` ₴ \n\n" \
+           f"_Тип оплати_ - *{order.type_payment}*\n _Cумма_ - `{total}` ₴ \n\n" \

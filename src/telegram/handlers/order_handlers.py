@@ -9,7 +9,7 @@ from aiogram import F
 from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import check_promo
-from src.database.tables import order_status
+from src.database.tables import order_status, type_payment
 from src.schemas import AddressModel, OrderModel
 from src.telegram.buttons import *
 import decimal
@@ -47,6 +47,7 @@ class OrderState(StatesGroup):
     total = State()
     discount = State()
     order_msg = State()
+    type_payment = State()
 
 
 @order_router.message(OrderState.block_input)
@@ -100,8 +101,6 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     msg = build_goods_full_info(goods)
     await callback.message.answer_photo(photo=goods.photo, caption=msg,
                                         reply_markup=ok_goods, parse_mode="MARKDOWN")
-
-
 
 
 async def update_num_text(*, message: Message, name: str, price: int, amount: int, new_msg=False):
@@ -206,13 +205,36 @@ async def anon(message: Message, state: FSMContext):
     if code:
         await state.update_data(promo_code=code)
         await state.update_data(discount=code.discount_percent)
-        await msg.edit_text("✅ Вітаємо, ви додали промокод!\n"
-                            f"      Діє знижка -{code.discount_percent} %",
-                            reply_markup=show_details)
+        await msg.answer("✅ Вітаємо, ви додали промокод!\n"
+                            f"      Діє знижка -{code.discount_percent} %\n\n")
+
+        await choose_payment(msg)
 
     else:
         await msg.edit_text(f"{msg.text}\n\n❌ Код не дійсний!",
                             parse_mode="MARKDOWN", reply_markup=if_promo_inl)
+
+
+@order_router.callback_query(Text("type_payment"))
+async def choose_payment(obj):
+    if isinstance(obj, Message):
+        await obj.edit_text("Оберіть тип доставки", reply_markup=type_delivery_inl)
+    else:
+        await obj.message.edit_text("Оберіть тип доставки", reply_markup=type_delivery_inl)
+
+
+
+@order_router.callback_query(Text(startswith="payment"))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    _, value = callback.data.split("|")
+    if value in type_payment[0]:
+        v = type_payment[0]
+    else:
+        v = type_payment[1]
+    await state.update_data(type_payment=v)
+    await callback.message.edit_text(f"Тип оплати - *{v[1]}*",
+                                     parse_mode="MARKDOWN",
+                                     reply_markup=show_details)
 
 
 @order_router.callback_query(Text("show_oder_details"))
@@ -221,14 +243,12 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     goods = get_goods_by_name(data['goods_name'])
     amount = data.get("amount", 1)
-    # await state.update_data()
-
-    # disc_percent = data['promo_code'].get("discount_percent", 0)
 
     order = OrderModel(user_id=user.user_id,
                        amount=amount,
                        ordered_goods=goods,
-                       total=0)
+                       total=0,
+                       type_payment=data['type_payment'][1])
 
     total = amount * goods.price
     if 'promo_code' in data.keys():
@@ -249,31 +269,47 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     order = create_new_order(data)
     await state.update_data(order=order)
+    print(data['type_payment'])
 
-    msg = f"Вітаємо, ви створили нове замовлення!\n" \
-          f"Будь ласка здейсніть оплату.\n" \
-          f"На карту `{card}`\n" \
-          f"У розмірі - `{data['total']}` ₴\n" \
-          f"Після чого натисніть - *Оплатив*"
-    await callback.message.edit_text(msg, reply_markup=pay_inl, parse_mode="MARKDOWN")
+    if data['type_payment'] == type_payment[0]:  # if user choose to pay online
+        msg = f"Вітаємо, ви створили нове замовлення!\n" \
+              f"Будь ласка здейсніть оплату.\n" \
+              f"На карту `{card}`\n" \
+              f"У розмірі - `{data['total']}` ₴\n" \
+              f"Після чого натисніть - *Оплатив*"
+        await callback.message.edit_text(msg, reply_markup=pay_inl, parse_mode="MARKDOWN")
+    else:
+        await confirm_payment(callback, state)
 
 
 @order_router.callback_query(Text("confirm_pay"))
-async def anon(callback: CallbackQuery, state: FSMContext):
+async def confirm_payment(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     order = data['order']
-    order.status = order_status[1]
+    # order.status = order_status[1]
+    order.status = "wait_confirm"
     order.save()
     print(order.status)
-    msg_for_admin = f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
-                    f"\nЗробив нове замовлення:\n\n{data['order_msg']}\n" \
-                    f"Статус - *{order.status[1]}*"
-    await send_confirmation_to_admin(msg_for_admin)
+    await notify_admins(data)
 
     msg = "Дякуємо за замовлення." \
           "Усю інформацію по вашому заказу буде перевіренно" \
-          "Та після перевірки оплати товар буде ваи відправленно." \
           "Якщо залишилися питання, ви завжди можете написати нам перший." \
-          "П.с Впевніться що вам можуть писати першими (якщо з являться уточнення з нашої сторони)"
+          "П.с Переконайтеся що вам можуть писати першими (якщо з'являться уточнення з нашої сторони)"
     await callback.message.answer("🌞🚀", reply_markup=user_main_btn)
     await callback.message.edit_text(msg)
+    await state.clear()
+
+
+
+async def notify_admins(data: dict):
+    # print(data["order_status"])
+    # print(order_status[1])
+    msg_for_admin = f"Юзер - `{data['username']}`\nId - `{data['user_id']}`" \
+                    f"\nЗробив нове замовлення:\n\n{data['order_msg']}\n" \
+                    f"Статус - *{order_status[1]}*"
+    await send_confirmation_to_admin(msg_for_admin)
+
+
+# async def save_order_in_db(data: dict):
+#     pass

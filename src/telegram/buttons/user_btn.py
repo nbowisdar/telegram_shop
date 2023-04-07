@@ -124,14 +124,21 @@ def build_addr_inl() -> InlineKeyboardMarkup:
 if_promo_inl = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text="✅ Так", callback_data="try_discount"),
-        InlineKeyboardButton(text="Ні (далі)➡️", callback_data="show_oder_details")
+        InlineKeyboardButton(text="Ні (далі)➡️", callback_data="type_payment")
     ],
     cancel_shortcut
 ])
 
+type_delivery_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="🚚 Сплатити онлайн", callback_data="payment|now")
+    ],
+    [InlineKeyboardButton(text="🚛 Наложний платіж", callback_data="payment|later")]
+])
+
 create_new_ordr_inl = InlineKeyboardMarkup(inline_keyboard=[
     [
-        InlineKeyboardButton(text="🛒 Створити новий заказ", callback_data="confirm_order")
+        InlineKeyboardButton(text="🛒 Створити замовлення", callback_data="confirm_order")
     ],
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])

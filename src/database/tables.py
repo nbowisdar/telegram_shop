@@ -41,6 +41,12 @@ order_status = [("created", "🛒 Створенний"),
                 ("executed", "🎉 Виконанно")]
 
 
+type_payment = [
+    ("now", "🚚 Сплатити онлайн"),
+    ("later", "🚛 Наложний платіж")
+]
+
+
 class Order(BaseModel):
     time_created = DateTimeField(default=datetime.now)
     ordered_goods = ForeignKeyField(Goods, backref="orders")
@@ -48,8 +54,8 @@ class Order(BaseModel):
     user = ForeignKeyField(User, backref="orders")
     discount = IntegerField(default=0)
     total = DecimalField(max_digits=10, decimal_places=2)
-
-    status = CharField(choices=order_status, default=order_status[0])
+    type_payment = CharField(choices=type_payment)
+    status = CharField(choices=order_status, default="created")
     note = CharField(null=True)
 
 

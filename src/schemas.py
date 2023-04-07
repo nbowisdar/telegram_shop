@@ -32,6 +32,7 @@ class OrderModel(Base):
     user_id: int
     discount: int = 0
     total: decimal.Decimal
+    type_payment: str
     time_created: datetime | None = None
     note: str | None = None
 

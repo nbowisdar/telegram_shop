@@ -22,6 +22,7 @@ def create_new_order(data: dict) -> Order:
         discount=data["discount"],
         total=data['total'],
         user=data['user_id'],
+        type_payment=data['type_payment'],
         ordered_goods=goods,
     )
     # print('before')
