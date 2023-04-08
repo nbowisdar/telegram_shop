@@ -1,5 +1,5 @@
 from src.database.tables import *
-from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel
+from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel, Period
 from loguru import logger
 
 cat_name = str
@@ -77,10 +77,36 @@ def get_goods_by_category(category: str) -> list[GoodsModel]:
 
 def update_goods_cache(goods: GoodsModel, delete=False):
     goods_list = cat_goods.get(goods.category, [])
-    goods_list.append(goods)
-    logger.info(f"cached - {goods.name}")
+    if delete:
+        cat_goods[goods.category] = []
+        logger.info(f"dropped from cache - {goods.name}")
+    else:
+        goods_list.append(goods)
+        logger.info(f"cached - {goods.name}")
 
 
 def reset_goods_cache():
     global cat_goods
     cat_goods = {}
+
+
+def get_users_orders(user_id: int, period: Period) -> list[Order]:
+    user = User.get(user_id=user_id)
+    return Order.select().where(
+        (Order.time_created > period.value) & (Order.user == user)
+    )
+
+
+
+def tests():
+    user_id = 286365412
+    #
+    # orders = Order.select().where(Order.user == user)
+    orders = get_users_orders(user_id, Period.all_time)
+    for i in orders:
+        print(i.ordered_goods)
+    # print(len(orders))
+
+
+if __name__ == '__main__':
+    tests()

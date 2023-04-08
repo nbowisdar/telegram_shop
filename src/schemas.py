@@ -1,7 +1,8 @@
 # from dataclasses import dataclass
+import enum
 from typing import NamedTuple
 import decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 
@@ -44,9 +45,20 @@ class OrderModel(Base):
     note: str | None = None
 
 
-# def from_dict_to_order_model(data: dict):
+class Period(enum.Enum):
+    week = datetime.now() - timedelta(days=7)
+    month = datetime.now() - timedelta(days=30)
+    year = datetime.now() - timedelta(days=360)
+    all_time = datetime(year=2000, month=1, day=1)
 
 
+per_by_name = {
+    "week": Period.week,
+    "month": Period.month,
+    "year": Period.year,
+    "all_time": Period.all_time,
+}
+# def get_period_by_name()
 
 class UserModel(Base):
     user_id: int

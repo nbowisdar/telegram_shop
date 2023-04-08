@@ -3,9 +3,10 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 from aiogram import F
 from setup import user_router
-from src.database.crud.get import get_user_schema_by_id
-from src.telegram.buttons import user_main_btn, community_btn, cancel_btn, build_profile_kb, \
-    addr_inline_fields
+from src.database.crud.get import get_user_schema_by_id, get_users_orders
+from src.messages import build_users_orders_msg
+from src.schemas import per_by_name
+from src.telegram.buttons import *
 from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressState
 from src.telegram.handlers.fsm_h.user_fsm.address.update_address import UpdateAddr
 from src.telegram.messages.user_msg import build_address_msg
@@ -57,15 +58,18 @@ async def update_addr(callback: CallbackQuery, state: FSMContext):
     # await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 
 
-# @user_router.message(F.text == "/test")
-# async def test(message: Message):
-#     bot.his
-#     await message.answer(msg, parse_mode="MARKDOWN")
+@user_router.message(F.text == "📦 Мої замовлення")
+async def test(message: Message):
+    await message.answer("За який проміжок часу?", reply_markup=get_order_kb(message.from_user.id))
 
 
-# @user_router.message(F.text == "🧩 Застосувати промокод")
-# async def test(message: Message):
-#
-#     await message.answer("dwa", parse_mode="MARKDOWN")
+@user_router.callback_query(Text(startswith="select_order"))
+async def update_addr(callback: CallbackQuery):
+
+    _, user_id, period_str = callback.data.split("|")
+    period = per_by_name[period_str]
+    orders = get_users_orders(int(user_id), period)
+    msg = build_users_orders_msg(orders)
+    await callback.message.edit_text(msg)
 
 

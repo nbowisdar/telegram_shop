@@ -19,13 +19,7 @@ user_main_btn = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-"""
-    full_name: str
-    mobile_number: str
-    city: str
-    post_number: int
-    user: int
-"""
+
 addr_inline_fields = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Повне ім'я", callback_data="full_name")],
@@ -51,6 +45,16 @@ def build_profile_kb(user_id: int) -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True
     )
+
+
+def get_order_kb(user_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="☀️ За неділю", callback_data=f"select_order|{user_id}|week"),
+             InlineKeyboardButton(text="🗓 За місяць", callback_data=f"select_order|{user_id}|month"),
+             InlineKeyboardButton(text="⌚️ За рік", callback_data=f"select_order|{user_id}|year")],
+            [InlineKeyboardButton(text="🌎 За весь час", callback_data=f"select_order|{user_id}|all_time")],
+        ])
 
 
 kb_inline1 = [
