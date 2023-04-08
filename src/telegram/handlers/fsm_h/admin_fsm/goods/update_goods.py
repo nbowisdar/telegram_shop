@@ -26,7 +26,7 @@ async def update_goods_category(message: Message, state: FSMContext):
     await message.edit_text("Оберіть категорію", reply_markup=categories_inl())
 
 
-@order_router.callback_query(Text(startswith="order_drop"))
+@order_router.callback_query(Text(startswith="admin_drop_msg"))
 async def anon(callback: CallbackQuery, state: FSMContext):
     _, action = callback.data.split("|")
     await callback.message.delete()

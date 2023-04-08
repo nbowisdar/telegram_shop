@@ -76,6 +76,8 @@ admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="
 
 
 def categories_inl(prefix="new_order_cat", admin=True) -> InlineKeyboardMarkup:
+    # if admin:
+    #     prefix += "adm"
     builder = InlineKeyboardBuilder()
     for cat in categories:
         builder.button(

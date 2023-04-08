@@ -33,13 +33,14 @@ class AmountPrice(NamedTuple):
 
 
 class OrderModel(Base):
-    # ordered_goods: GoodsModel
     ordered_goods_id: int
     user_id: int
     total: decimal.Decimal
     type_payment: str
     discount: int = 0
     amount: int = None
+    ordered_goods: GoodsModel | None = None
+    ordered_goods_id: int | None = None
     amount_disc: AmountPrice = None
     time_created: datetime | None = None
     note: str | None = None

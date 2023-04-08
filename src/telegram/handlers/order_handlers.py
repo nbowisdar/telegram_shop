@@ -54,11 +54,9 @@ async def new_order(message: Message, state: FSMContext):
     await state.update_data(user_id=(data.get("user_id", message.from_user.id)))
     await state.update_data(username=(data.get("username", message.from_user.username)))
     msg = await message.answer('Генерація нового замовлення 👇', reply_markup=ReplyKeyboardRemove())
-    # data = await state.get_data()
-    # print(data)
 
     await msg.delete()
-    await message.answer("Оберіть категорію", reply_markup=categories_inl())
+    await message.answer("Оберіть категорію", reply_markup=categories_inl(admin=False))
 
 
 @order_router.callback_query(Text(startswith="order_drop"))
@@ -69,7 +67,8 @@ async def anon(callback: CallbackQuery, state: FSMContext):
         await state.clear()
         await callback.message.answer("❌ Скасовано ❌", reply_markup=user_main_btn)
         return
-    await new_order(callback.message, state)
+    await callback.message.answer("Оберіть категорію", reply_markup=categories_inl(admin=False))
+    # await new_order(callback.message, state)
 
 
 @order_router.callback_query(Text(startswith="new_order_cat"))
