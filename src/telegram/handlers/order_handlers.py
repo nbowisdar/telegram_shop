@@ -23,16 +23,6 @@ from src.telegram.buttons import user_main_btn
 from src.telegram.messages.user_msg import build_goods_full_info, build_address_msg, build_result_order_msg
 from src.telegram.utils.nitifications import send_confirmation_to_admin
 
-"""
-class OrderModel(NamedTuple):
-    time_created: datetime
-    ordered_goods: GoodsModel
-    amount_disc: int
-    user: UserModel
-    with_discount: bool
-    note: str | None = None
-"""
-
 
 class OrderState(StatesGroup):
     goods_name = State()

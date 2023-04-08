@@ -1,18 +1,25 @@
 import re
 
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
+from src.database.crud.get import reset_goods_cache
 from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
-from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn
-from setup import admin_router
+from src.database.tables import Goods
+from src.messages import build_goods_full_msg
+from src.schemas import GoodsModel
+from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
+    build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn
+from setup import admin_router, change_status
 from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
-from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import UpdateAddr
+from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import GoodsUpdateState
+from src.telegram.utils.nitifications import send_to_all_users
 
 
 @admin_router.message(F.text.in_(["/admin", "⬅️ На головну"]))
@@ -21,12 +28,14 @@ async def main(message: Message):
                          reply_markup=admin_main_kb)
 
 
-# @admin_router.message(F.text == '🔑 Створити новий промокод')
-# async def create_promo(message: Message):
-#     new_cod = generate_new_code()
-#     await message.reply(f'Ви створили новий промокод - `{new_cod}`',
-#                         reply_markup=admin_main_kb,
-#                         parse_mode="MARKDOWN")
+@admin_router.callback_query(Text(startswith="admin_drop_msg"))
+async def update_goods(callback: CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.clear()
+    await callback.message.answer("🎉 Головна сторінка", reply_markup=admin_main_kb)
 
 
 @admin_router.message(F.text == '🛍 Товари')
@@ -40,10 +49,46 @@ async def add_goods(message: Message, state: FSMContext):
     await state.set_state(GoodsState.name)
 
 
-# @admin_router.message(F.text == "🔨 Оновити")
-# async def add_goods(message: Message, state: FSMContext):
-#     await message.answer("Введіть назву товару", reply_markup=admin_cancel_btn)
-#     await state.set_state(UpdateAddr.field)
+@admin_router.message(F.text == "🔨 Оновити")
+async def add_goods(message: Message, state: FSMContext):
+    await message.delete()
+    await message.answer("Оберіть категорію", reply_markup=categories_inl("update_goods_cat", admin=True))
+
+
+@admin_router.callback_query(Text(startswith="update_goods_cat"))
+async def update_goods(callback: CallbackQuery, ):
+    _, action = callback.data.split("|")
+    await callback.message.edit_text("Оберіть товар, яких хочете оновити або видалити",
+                                     reply_markup=build_goods_with_price_inl(action, "update_one_goods", True))
+
+
+@admin_router.callback_query(Text(startswith="update_one_goods"))
+async def update_goods(callback: CallbackQuery, state: FSMContext):
+    _, goods_name = callback.data.split("|")
+    await callback.message.edit_text("Оберіть товар, яких хочете оновити або видалити",
+                                     reply_markup=delete_or_update_one(goods_name))
+
+
+@admin_router.callback_query(Text(startswith="change_one"))
+async def update_goods(callback: CallbackQuery, state: FSMContext):
+    _, action, goods_name = callback.data.split("|")
+    goods = Goods.get(name=goods_name)
+    if action == "delete":
+        reset_goods_cache()
+        goods.delete_instance()
+        await callback.message.edit_text("🗑 Товар видаленно")
+
+    elif action == "update":
+        await state.set_state(GoodsUpdateState.field)
+        goods_model = GoodsModel.from_orm(goods)
+
+        await state.update_data(goods=goods_model)
+        msg = build_goods_full_msg(goods_model)
+        await callback.message.delete()
+        await callback.message.answer_photo(photo=goods.photo, caption=msg,
+                                            parse_mode="MARKDOWN",
+                                            reply_markup=update_goods_inl(goods_model))
+
 
 
 @admin_router.message(F.text == "🔑 Створити новий промокод")
@@ -79,11 +124,32 @@ async def get_new_order(callback: CallbackQuery):
     await callback.answer()
 
 
-# @admin_router.callback_query(Text(text="cancel"))
-# async def get_new_order(query: CallbackQuery):
-#     msg = f"{query.message.text}\n❌ Відхилено"
-#     user_id = query.message.text.split(" ")[1]
-#     await query.message.edit_text(msg)
-#
-#     await bot.send_message(user_id, t)
-#     await query.answer()
+@admin_router.message(F.text == "💾 Інше")
+async def anon(message: Message, state: FSMContext):
+    await message.answer("Інші функції",
+                         reply_markup=other_bot_btn())
+
+
+@admin_router.message(F.text.in_(["🛑 Зупинити бота", "🚀 Запустити бота"]))
+async def anon(message: Message, state: FSMContext):
+    change_status()
+    if message.text == "🛑 Зупинити бота":
+        await message.answer("⏸ Роботу бота зупиненно!", reply_markup=other_bot_btn())
+    else:
+        await message.answer("🎉 Бот активованно!", reply_markup=other_bot_btn())
+
+
+class NotifyAll(StatesGroup):
+    msg = State()
+
+
+@admin_router.message(F.text == "📫 Розіслати повідомлення")
+async def anon(message: Message, state: FSMContext):
+    await state.set_state(NotifyAll.msg)
+    await message.answer("Надішли мені повідомлення котре отримують усі користувачи.", reply_markup=admin_cancel_btn)
+
+
+@admin_router.message(NotifyAll.msg)
+async def anon(message: Message, state: FSMContext):
+    await send_to_all_users(message)
+    await state.clear()

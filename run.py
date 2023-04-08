@@ -7,10 +7,12 @@ import asyncio
 from loguru import logger
 
 from src.telegram.middleware.admin_only import AdminOnly
+from src.telegram.middleware.check_bot_online import CheckOnline
 
 
 async def _start():
     admin_router.message.middleware(AdminOnly())
+    user_router.message.middleware(CheckOnline())
     dp.include_router(admin_router)
     dp.include_router(user_router)
     dp.include_router(order_router)

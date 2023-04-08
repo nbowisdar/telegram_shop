@@ -4,3 +4,5 @@ __pycache__/
 .idea/
 test.py
 app.db
+config.py
+settings.json

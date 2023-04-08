@@ -1,31 +1,19 @@
 from aiogram.types import Message
 
-from src.schemas import AddressModel
+from src.schemas import AddressModel, GoodsModel
+
+'''
+class GoodsModel(Base):
+    name: str
+    desc: str
+    category: str
+    price: decimal.Decimal
+    photo: str
+'''
 
 
-# from src.database.queries import get_all_accounts
-# from src.schemas import OrderModel
-
-
-def build_address_msg(address: AddressModel) -> str:
-    return f"Ваше імя"
-
-
-def show_order(order) -> str:
-    if order.with_discount:
-        price = f"*{round(order.account_price / 100 * 80, 2)}* руб.\nСКИДКА - {round(order.account_price / 100 * 20, 2)}"
-    else:
-        price = order.account_price
-    msg = f"""
-id заказчика - [{order.user_id}](tg://user?id={order.user_id})
-Username - `@{order.account_username}`
-Товар - *{order.account_name}* 
-Цена - {price} руб.
-Город - *{order.city}*
-Пол - *{order.sex}*
-"""
-    if order.car:
-        msg += f"Машина - *{order.car}*\n"
-    if order.note:
-        msg += f"Коментарий - {order.note}\n"
-    return msg
+def build_goods_full_msg(goods: GoodsModel):
+    return f"Назва - _{goods.name}_\n" \
+           f"Опис - _{goods.desc}_\n" \
+           f"Категорія - _{goods.category}_\n" \
+           f"Ціна - *{float(goods.price)}* ₴\n" \

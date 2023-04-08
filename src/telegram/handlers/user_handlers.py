@@ -63,9 +63,9 @@ async def update_addr(callback: CallbackQuery, state: FSMContext):
 #     await message.answer(msg, parse_mode="MARKDOWN")
 
 
-@user_router.message(F.text == "🧩 Застосувати промокод")
-async def test(message: Message):
-
-    await message.answer("dwa", parse_mode="MARKDOWN")
+# @user_router.message(F.text == "🧩 Застосувати промокод")
+# async def test(message: Message):
+#
+#     await message.answer("dwa", parse_mode="MARKDOWN")
 
 

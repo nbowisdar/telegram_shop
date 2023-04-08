@@ -1,3 +1,4 @@
+from src.database.crud.get import reset_goods_cache
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel
 
@@ -6,6 +7,17 @@ def update_addr_field(*, user_id: int, field_name: str, new_value: str):
     addr = User.get(user_id=user_id).address[0]
     setattr(addr, field_name, new_value)
     addr.save()
+
+
+def update_goods_field(*, goods_name, field_name: str, new_value: str) -> Goods | str:
+    try:
+        goods = Goods.get(name=goods_name)
+        setattr(goods, field_name, new_value)
+        reset_goods_cache()
+        goods.save()
+    except Exception as err:
+        return str(err)
+    return goods
 
 
 def update_order_status(order_id: int, new_status: str):

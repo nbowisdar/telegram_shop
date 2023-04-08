@@ -68,16 +68,20 @@ ok_goods = InlineKeyboardMarkup(inline_keyboard=[
 
 cancel_inl_ord = InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")
 from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")
+admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="admin_drop_msg")
 
 
-def categories_inl() -> InlineKeyboardMarkup:
+def categories_inl(prefix="new_order_cat", admin=True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for cat in categories:
         builder.button(
-            text=cat.capitalize(), callback_data=f"new_order_cat|{cat}"
+            text=cat.capitalize(), callback_data=f"{prefix}|{cat}"
         )
     builder.adjust(3)
-    builder.row(cancel_inl_ord)
+    if not admin:
+        builder.row(cancel_inl_ord)
+    else:
+        builder.row(admin_drop_msg)
     return builder.as_markup()
 
 
@@ -99,15 +103,18 @@ def build_amount_disc_inl():
     return keyboard
 
 
-def build_goods_with_price_inl(category: str) -> InlineKeyboardMarkup:
+def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False) -> InlineKeyboardMarkup:
     goods: list[GoodsModel] = get_goods_by_category(category.casefold())
     builder = InlineKeyboardBuilder()
     for g in goods:
         builder.button(
-            text=f'{g.name}: Ціна - {g.price} грн.', callback_data=f"new_order_g|{g.name}"
+            text=f'{g.name}: Ціна - {g.price} грн.', callback_data=f"{prefix}|{g.name}"
         )
     builder.adjust(1)
-    builder.row(from_scratch_inl_ord, cancel_inl_ord)
+    if not admin:
+        builder.row(from_scratch_inl_ord, cancel_inl_ord)
+    else:
+        builder.row(admin_drop_msg)
     return builder.as_markup()
 
 
