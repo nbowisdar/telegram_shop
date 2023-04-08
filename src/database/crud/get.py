@@ -97,6 +97,9 @@ def get_users_orders(user_id: int, period: Period) -> list[Order]:
     )
 
 
+def get_order_by_id(order_id: int) -> Order | None:
+    return Order.get_or_none(id=order_id)
+
 
 def tests():
     user_id = 286365412

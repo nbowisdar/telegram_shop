@@ -21,14 +21,15 @@ admin_main_kb = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+on_main_admin_kb = KeyboardButton(text="⬅️ На головну")
+
 admin_goods_kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="✏️ Додати"), KeyboardButton(text="🔨 Оновити")],
         [KeyboardButton(text="⬅️ На головну")]
-],
+    ],
     resize_keyboard=True
 )
-
 
 "Inline keyboards bellow"
 
@@ -75,3 +76,28 @@ def other_bot_btn() -> ReplyKeyboardMarkup:
         ],
         resize_keyboard=True
     )
+
+
+find_order_option = ReplyKeyboardMarkup(keyboard=[
+    [InlineKeyboardButton(text=f"🔍 Знайти замовлення")],
+    [on_main_admin_kb]
+], resize_keyboard=True)
+
+
+def update_status_order_inl(order_id) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="♻️ Оновити статус", callback_data=f"update_order_status|{order_id}"),
+        ],
+        [InlineKeyboardButton(text="❌ Закрити", callback_data="to_main_admin_drop_msg")]
+    ])
+
+
+def update_status_order_choice(order_id) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Підтвердженно", callback_data=f"update_order_choice|{order_id}|confirmed"),
+            InlineKeyboardButton(text="🛑 Скасованно", callback_data=f"update_order_choice|{order_id}|canceled"),
+            InlineKeyboardButton(text="🎉 Виконанно", callback_data=f"update_order_choice|{order_id}|executed"),
+        ], [InlineKeyboardButton(text="❌ Закрити", callback_data="to_main_admin_drop_msg")]
+    ])

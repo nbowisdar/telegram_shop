@@ -6,14 +6,15 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
-from src.database.crud.get import reset_goods_cache
+from src.database.crud.get import reset_goods_cache, get_order_by_id
 from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
 from src.database.tables import Goods
-from src.messages import build_goods_full_msg
+from src.messages import build_goods_full_msg, build_order_info_for_admin
 from src.schemas import GoodsModel
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
-    build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn
+    build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn, find_order_option, \
+    update_status_order_choice, update_status_order_inl
 from setup import admin_router, change_status
 from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
@@ -90,7 +91,6 @@ async def update_goods(callback: CallbackQuery, state: FSMContext):
                                             reply_markup=update_goods_inl(goods_model))
 
 
-
 @admin_router.message(F.text == "🔑 Створити новий промокод")
 async def new_code(message: Message, state: FSMContext):
     await state.set_state(PromoCodeState.max_use_left)
@@ -117,7 +117,6 @@ async def get_new_order(callback: CallbackQuery):
               " ви можете звернутися до нашої підтримку."
         msg = "❌ Відхилено"
         update_order_status(order_id, "canceled")
-
 
     await callback.message.edit_text(msg)
     await bot.send_message(user_id, ans)
@@ -153,3 +152,64 @@ async def anon(message: Message, state: FSMContext):
 async def anon(message: Message, state: FSMContext):
     await send_to_all_users(message)
     await state.clear()
+
+
+class FindOrder(StatesGroup):
+    order_id = State()
+    cur_msg = State()
+
+
+@admin_router.message(F.text == "📊 Замовлення")
+async def anon(message: Message):
+    await message.answer("🛍 Замовлення", reply_markup=find_order_option)
+
+
+@admin_router.message(F.text == "🔍 Знайти замовлення")
+async def anon(message: Message, state: FSMContext):
+    await message.answer("Відправте id замовлення", reply_markup=admin_cancel_btn)
+    await state.set_state(FindOrder.order_id)
+
+
+@admin_router.message(FindOrder.order_id)
+async def anon(message: Message, state: FSMContext):
+
+    order_id = message.text
+    if not order_id.isdigit():
+        await message.reply("❌ Повинно бути число", reply_markup=find_order_option)
+        await state.clear()
+        return
+    order = get_order_by_id(int(order_id))
+    if order:
+        msg = build_order_info_for_admin(order)
+        cur_msg = await message.answer(msg, reply_markup=update_status_order_inl(order_id))
+        await state.update_data(cur_msg=cur_msg)
+    else:
+        msg = "⚠️ Замовлення не знайдено"
+        await state.clear()
+        await message.reply(msg, reply_markup=find_order_option)
+
+
+@admin_router.callback_query(Text("to_main_admin_drop_msg"))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    await callback.message.answer("Головна", reply_markup=admin_main_kb)
+
+
+@admin_router.callback_query(Text(startswith='update_order_status|'))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    # _, order_id, new_status = callback.data.split("|")
+    _, order_id = callback.data.split("|")
+
+    data = await state.get_data()
+    await data['cur_msg'].edit_text("Оберіть новий статус",
+                                    reply_markup=update_status_order_choice(int(order_id)))
+
+
+@admin_router.callback_query(Text(startswith='update_order_choice|'))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    _, order_id, new_status = callback.data.split("|")
+    print(new_status)
+    update_order_status(int(order_id), new_status)
+    order = get_order_by_id(int(order_id))
+    msg = build_order_info_for_admin(order)
+    await callback.message.edit_text(msg, reply_markup=update_status_order_inl(order_id))

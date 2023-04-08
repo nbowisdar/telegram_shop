@@ -26,7 +26,6 @@ def build_result_order_msg(order: OrderModel, address: AddressModel, total: floa
            f"Товар - *{order.ordered_goods.name}*\n" \
            f"Кількість - *{order.amount}*\n" \
            f"Ціна - *{order.ordered_goods.price}* ₴\n\n" \
-           f"" \
            f"_Адрес доставки_:\n" \
            f"Повне ім'я - *{address.full_name}*\n" \
            f"Мобільний - *{address.mobile_number}*\n" \

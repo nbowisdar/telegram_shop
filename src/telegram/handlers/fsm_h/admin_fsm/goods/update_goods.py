@@ -31,9 +31,10 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     _, action = callback.data.split("|")
     await callback.message.delete()
     if action == "cancel":
+        await callback.message.answer("❌ Скасовано ❌", reply_markup=admin_main_kb)
         await state.clear()
-        await callback.message.answer("❌ Скасовано ❌", reply_markup=user_main_btn)
         return
+
     # await new_order(callback.message, state)
 
 

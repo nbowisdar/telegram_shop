@@ -10,6 +10,7 @@ from src.telegram.buttons import *
 from src.telegram.handlers.fsm_h.user_fsm.address.add_address import AddressState
 from src.telegram.handlers.fsm_h.user_fsm.address.update_address import UpdateAddr
 from src.telegram.messages.user_msg import build_address_msg
+from src.telegram.utils.check_msg_size import divide_big_msg
 
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
@@ -70,6 +71,12 @@ async def update_addr(callback: CallbackQuery):
     period = per_by_name[period_str]
     orders = get_users_orders(int(user_id), period)
     msg = build_users_orders_msg(orders)
-    await callback.message.edit_text(msg)
+    msgs_list = divide_big_msg(msg)
+    print(msgs_list)
+    if not msg:
+        await callback.message.edit_text("🤷‍♂️ У вас ще немає заказів")
+    else:
+        for msg in msgs_list:
+            await callback.message.answer(msg)
 
 
