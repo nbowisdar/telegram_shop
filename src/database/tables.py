@@ -20,7 +20,9 @@ class BaseModel(Model):
 
 class User(BaseModel):
     user_id = IntegerField(unique=True, primary_key=True)
+    username = CharField(max_length=100)
     register_time = DateTimeField(default=datetime.now)
+    banned = BooleanField(default=False)
 
 
 class Goods(BaseModel):

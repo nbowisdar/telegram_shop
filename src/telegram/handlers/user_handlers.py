@@ -4,6 +4,7 @@ from aiogram.filters import Command, Text
 from aiogram import F
 from setup import user_router
 from src.database.crud.get import get_user_schema_by_id, get_users_orders
+from src.database.tables import User
 from src.messages import build_users_orders_msg
 from src.schemas import per_by_name
 from src.telegram.buttons import *
@@ -15,6 +16,7 @@ from src.telegram.utils.check_msg_size import divide_big_msg
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
 async def start(message: Message):
+    User.get_or_create(user_id=message.from_user.id, username=message.from_user.username)
     await message.answer("Головна сторінка 🌞",
                          reply_markup=user_main_btn)
 
@@ -66,17 +68,17 @@ async def test(message: Message):
 
 @user_router.callback_query(Text(startswith="select_order"))
 async def update_addr(callback: CallbackQuery):
-
     _, user_id, period_str = callback.data.split("|")
     period = per_by_name[period_str]
     orders = get_users_orders(int(user_id), period)
     msg = build_users_orders_msg(orders)
     msgs_list = divide_big_msg(msg)
-    print(msgs_list)
     if not msg:
         await callback.message.edit_text("🤷‍♂️ У вас ще немає заказів")
     else:
         for msg in msgs_list:
             await callback.message.answer(msg)
+
+    await callback.answer()
 
 

@@ -69,7 +69,7 @@ async def set_name(message: Message, state: FSMContext):
         data = AddressModel(**data)
         try:
             create_address(data)
-            msg = "✅ Ви додали адресс!"
+            msg = "✅ Ви додали адрес!"
         except IntegrityError:
             msg = "🛑 Ви можете додати лише один адрес"
         await message.answer(msg, reply_markup=user_main_btn)

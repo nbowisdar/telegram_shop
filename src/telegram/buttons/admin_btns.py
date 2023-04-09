@@ -3,6 +3,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from setup import get_status
 from src.schemas import GoodsModel
+from src.telegram.middleware.check_bot_online import blocked_users
 
 admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="admin_drop_msg")
 
@@ -64,7 +65,7 @@ def update_goods_inl(goods: GoodsModel) -> InlineKeyboardMarkup:
 
 
 def other_bot_btn() -> ReplyKeyboardMarkup:
-    print(get_status())
+    # print(get_status())
     if get_status():
         action = "🛑 Зупинити бота"
     else:
@@ -80,9 +81,25 @@ def other_bot_btn() -> ReplyKeyboardMarkup:
 
 
 find_order_option = ReplyKeyboardMarkup(keyboard=[
-    [InlineKeyboardButton(text=f"🔍 Знайти замовлення")],
+    [InlineKeyboardButton(text=f"🔍 Знайти замовлення"),
+     InlineKeyboardButton(text=f"🔍 Знайти користувача")],
     [on_main_admin_kb]
 ], resize_keyboard=True)
+
+
+def action_with_found_user(user_id) -> InlineKeyboardMarkup:
+    if int(user_id) in blocked_users:
+        text, action = "🤝 Розблокувати", "unblock"
+    else:
+        text, action = "👮‍♀️ Заблокувати", "block"
+
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Останні 10 замовлень", callback_data=f"found_user|last_10_order|{user_id}"),
+            InlineKeyboardButton(text=text, callback_data=f"found_user|{action}|{user_id}"),
+        ],
+        [InlineKeyboardButton(text="❌ Закрити", callback_data="to_main_admin_drop_msg")]
+    ])
 
 
 def update_status_order_inl(order_id) -> InlineKeyboardMarkup:

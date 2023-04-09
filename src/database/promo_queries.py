@@ -24,7 +24,7 @@ def generate_new_code(*, max_use_left=10000, discount_percent=10, num_char=8) ->
                                   max_use_left=max_use_left,
                                   discount_percent=discount_percent)
             PromoCode.create(**code.dict())
-            print(code.code)
+            # print(code.code)
             return code
         except IntegrityError:
             pass

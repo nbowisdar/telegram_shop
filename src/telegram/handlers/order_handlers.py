@@ -49,7 +49,7 @@ async def new_order(message: Message):
 async def new_order(message: Message, state: FSMContext):
     await state.set_state(OrderState.block_input)
     data = await state.get_data()
-    await state.update_data(amount_disc=buy_variants_struct[0])
+    # await state.update_data(amount_disc=buy_variants_struct[0])
     await state.update_data(discount=0)
     await state.update_data(user_id=(data.get("user_id", message.from_user.id)))
     await state.update_data(username=(data.get("username", message.from_user.username)))
@@ -92,102 +92,119 @@ async def anon(callback: CallbackQuery, state: FSMContext):
                                         reply_markup=ok_goods, parse_mode="MARKDOWN")
 
 
-async def update_num_text(*, message: Message,
-                          name: str,
-                          price: int,
-                          amount_disc: AmountPrice, new_msg=False):
+# async def update_num_text(*, message: Message,
+#                           name: str,
+#                           price: int,
+#                           amount_disc: AmountPrice, new_msg=False):
+#
+#     bill = round(price * amount_disc.amount / 100 * float(amount_disc.price), 2)
+#
+#     msg = f"Товар: _{name}_ *{amount_disc.amount}* шт. 👉 *{bill}* ₴"
+#     if new_msg:
+#         await message.answer(msg, parse_mode="MARKDOWN", reply_markup=build_amount_disc_inl())
+#     else:
+#         await message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=build_amount_disc_inl())
 
-    bill = round(price * amount_disc.amount / 100 * float(amount_disc.price), 2)
 
-    msg = f"Товар: _{name}_ *{amount_disc.amount}* шт. 👉 *{bill}* ₴"
-    if new_msg:
-        await message.answer(msg, parse_mode="MARKDOWN", reply_markup=build_amount_disc_inl())
-    else:
-        await message.edit_text(msg, parse_mode="MARKDOWN", reply_markup=build_amount_disc_inl())
-
-
-@order_router.message(OrderState.amount_disc)
-async def custom_amount(message: Message, state: FSMContext):
-    try:
-        custom_var = None
-        amount = int(message.text)
-        for var in buy_variants_struct:
-            if amount < var.amount:
-                custom_var = AmountPrice(amount, var.price)
-
-        if not custom_var:
-            custom_var = AmountPrice(amount, buy_variants_struct[-1].price)
-        await state.update_data(amount_disc=custom_var)
-        await state.set_state(OrderState.block_input)
-    except TypeError:
-        await message.reply("🛑 Повинно бути число!")
-        await state.clear()
-
-    # msg = await message.answer(".")
-    data = await state.get_data()
-    await select_address(data['current_msg'], state)
-    await message.delete()
+# @order_router.message(OrderState.amount_disc)
+# async def custom_amount(message: Message, state: FSMContext):
+#     try:
+#         custom_var = None
+#         amount = int(message.text)
+#         for var in buy_variants_struct:
+#             if amount < var.amount:
+#                 custom_var = AmountPrice(amount, var.price)
+#
+#         if not custom_var:
+#             custom_var = AmountPrice(amount, buy_variants_struct[-1].price)
+#         await state.update_data(amount_disc=custom_var)
+#         await state.set_state(OrderState.block_input)
+#     except TypeError:
+#         await message.reply("🛑 Повинно бути число!")
+#         await state.clear()
+#
+#     # msg = await message.answer(".")
+#     data = await state.get_data()
+#     await select_address(data['current_msg'], state)
+#     await message.delete()
 
 
 @order_router.callback_query(Text(startswith="new_order_num"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-    prefix, action = callback.data.split('|')
-    data = await state.get_data()
+    await callback.message.delete()
+    await callback.message.answer("Оберіть кількість", reply_markup=build_amount_disc_inl())
 
-    if action == "other":
-        msg = await callback.message.edit_text("Введіть потрібну кількість")
-        await state.update_data(current_msg=msg)
-        await state.set_state(OrderState.amount_disc)
-        return
 
-    variants_len = len(buy_variants_struct)
-    amount_disc = data.get("amount_disc", buy_variants_struct[0])
+@order_router.callback_query(Text(startswith="new_order_num"))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    # await callback.message.delete()
+    await callback.message.answer("Оберіть кількість", reply_markup=build_amount_disc_inl())
 
-    name = data['goods_name']
-    goods = get_goods_by_name(name)
 
-    if action == "finish":
-        await select_address(callback, state)
-        return
-    if action == "start":
-        await callback.message.delete()
-        await update_num_text(message=callback.message,
-                              name=name,
-                              amount_disc=amount_disc,
-                              price=int(goods.price),
-                              new_msg=True)
-        return
-
-    if action == "incr":
-        cur_pos = buy_variants_struct.index(amount_disc)
-        if cur_pos + 1 >= variants_len:
-            amount_disc = buy_variants_struct[0]
-        else:
-            amount_disc = buy_variants_struct[cur_pos + 1]
-
-    elif action == "decr":
-        cur_pos = buy_variants_struct.index(amount_disc)
-        if cur_pos + 1 <= 0:
-            amount_disc = buy_variants_struct[-1]
-        else:
-            amount_disc = buy_variants_struct[cur_pos -1]
-
-    await state.update_data(amount_disc=amount_disc)
-    await update_num_text(message=callback.message,
-                          name=name,
-                          amount_disc=amount_disc,
-                          price=int(goods.price))
+# @order_router.callback_query(Text(startswith="new_order_num"))
+# async def anon(callback: CallbackQuery, state: FSMContext):
+#     prefix, action = callback.data.split('|')
+#     data = await state.get_data()
+#
+#     if action == "other":
+#         msg = await callback.message.edit_text("Введіть потрібну кількість")
+#         await state.update_data(current_msg=msg)
+#         await state.set_state(OrderState.amount_disc)
+#         return
+#
+#     variants_len = len(buy_variants_struct)
+#     amount_disc = data.get("amount_disc", buy_variants_struct[0])
+#
+#     name = data['goods_name']
+#     goods = get_goods_by_name(name)
+#
+#     if action == "finish":
+#         await select_address(callback, state)
+#         return
+#     if action == "start":
+#         await callback.message.delete()
+#         await update_num_text(message=callback.message,
+#                               name=name,
+#                               amount_disc=amount_disc,
+#                               price=int(goods.price),
+#                               new_msg=True)
+#         return
+#
+#     if action == "incr":
+#         cur_pos = buy_variants_struct.index(amount_disc)
+#         if cur_pos + 1 >= variants_len:
+#             amount_disc = buy_variants_struct[0]
+#         else:
+#             amount_disc = buy_variants_struct[cur_pos + 1]
+#
+#     elif action == "decr":
+#         cur_pos = buy_variants_struct.index(amount_disc)
+#         if cur_pos + 1 <= 0:
+#             amount_disc = buy_variants_struct[-1]
+#         else:
+#             amount_disc = buy_variants_struct[cur_pos -1]
+#
+#     await state.update_data(amount_disc=amount_disc)
+#     await update_num_text(message=callback.message,
+#                           name=name,
+#                           amount_disc=amount_disc,
+#                           price=int(goods.price))
 
 
 @order_router.callback_query(Text(startswith="new_order_addr"))
 async def select_address(callback: CallbackQuery, state: FSMContext):
+
+    _, n = callback.data.split("|")
+    # users_var = buy_variants_struct[n]
+    await state.update_data(amount_disc=buy_variants_struct[int(n)])
+
     data = await state.get_data()
     user = get_user_schema_by_id(data['user_id'])
 
     if isinstance(callback, Message):
         if user.address:
-            print(callback)
-            print(callback.text)
+            # print(callback)
+            # print(callback.text)
             msg = "Бажаєте викорастити цей адрес?\n\n" + build_address_msg(user.address)
             await callback.edit_text(msg, parse_mode="MARKDOWN",
                                              reply_markup=build_addr_inl())
@@ -285,6 +302,7 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     goods = get_goods_by_name(data['goods_name'])
     amount_disc = data.get("amount_disc", buy_variants_struct[0])
+    # print(amount_disc, 305)
     order = OrderModel(user_id=user.user_id,
                        amount_disc=amount_disc,
                        ordered_goods=goods,
@@ -295,7 +313,7 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
 
     total = round(amount_disc.amount * goods.price / 100 * amount_disc.price, 2)
     if 'promo_code' in data.keys():
-        print(data['promo_code'], 276)
+        # print(data['promo_code'], 276)
         disc_percent = data['promo_code'].discount_percent
         total -= round(total / 100 * disc_percent, 2)
         order.total = total
@@ -313,7 +331,7 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
     # await state.update_data(order=order)
-    print(data['type_payment'])
+    # print(data['type_payment'])
 
     if data['type_payment'] == "now":  # if user choose to pay online
         msg = f"Вітаємо, ви створили нове замовлення!\n" \

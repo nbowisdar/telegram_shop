@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from config import categories
+from config import categories, buy_variants
 from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
 from src.schemas import GoodsModel
 
@@ -66,7 +66,7 @@ community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 ok_goods = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
-     InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|start")],
+     InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num")],
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])
 
@@ -96,17 +96,32 @@ cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callbac
 
 
 def build_amount_disc_inl():
-    buttons = [
-        [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
-        [
-            InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),
-            InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
-        ],
-        [InlineKeyboardButton(text="✍️ Інше значення", callback_data="new_order_num|other")],
-        cancel_shortcut
-    ]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-    return keyboard
+    builder = InlineKeyboardBuilder()
+    count = 0
+    for amount, percent in buy_variants:
+        builder.row(
+            InlineKeyboardButton(text=f"Кількість - {amount} л. 👉 Знижка - {100-percent} %",
+                                 callback_data=f"new_order_addr|{count}")
+        )
+        count += 1
+    # keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    builder.row(
+        from_scratch_inl_ord, cancel_inl_ord
+    )
+    return builder.as_markup()
+
+# def build_amount_disc_inl():
+#     buttons = [
+#         [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
+#         [
+#             InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),
+#             InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
+#         ],
+#         [InlineKeyboardButton(text="✍️ Інше значення", callback_data="new_order_num|other")],
+#         cancel_shortcut
+#     ]
+#     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+#     return keyboard
 
 
 def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False) -> InlineKeyboardMarkup:
@@ -114,7 +129,7 @@ def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False)
     builder = InlineKeyboardBuilder()
     for g in goods:
         builder.button(
-            text=f'{g.name}: Ціна - {g.price} грн.', callback_data=f"{prefix}|{g.name}"
+            text=f'{g.name}: Ціна - {g.price} грн/л', callback_data=f"{prefix}|{g.name}"
         )
     builder.adjust(1)
     if not admin:

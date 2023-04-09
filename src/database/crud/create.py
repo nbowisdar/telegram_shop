@@ -4,7 +4,7 @@ from src.schemas import *
 
 
 def create_address(address: AddressModel):
-    user, created = User.get_or_create(user_id=address.user_id)
+    user = User.get(user_id=address.user_id)
     user.address = Address.create(**address.dict())
     update_user_addr_cache(address)
 
@@ -25,8 +25,7 @@ def create_new_order(data: dict) -> Order:
         type_payment=data['type_payment'],
         ordered_goods=goods,
     )
-    # print('before')
-    # return OrderModel.from_orm(order)
+
 
 
 def tests():

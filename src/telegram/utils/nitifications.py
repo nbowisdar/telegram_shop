@@ -15,7 +15,7 @@ async def send_confirmation_to_admin(msg: str):
 
 
 async def send_text_or_photo(*, msg: Message, user_id: int):
-    print(user_id)
+    # print(user_id)
     if msg.photo:
         photo = msg.photo[-1].file_id
         caption = msg.caption

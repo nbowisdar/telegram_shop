@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from aiogram.types import Message
 
 from src.database.tables import Order, order_status, type_payment
@@ -20,7 +22,7 @@ def build_goods_full_msg(goods: GoodsModel):
            f"Ціна - *{float(goods.price)}* ₴\n"
 
 
-def build_users_orders_msg(orders: list[Order]) -> str:
+def build_users_orders_msg(orders: Iterable[Order]) -> str:
     order_list = []
     for order in orders:
         readable_status = order_status.get(order.status)
@@ -28,7 +30,7 @@ def build_users_orders_msg(orders: list[Order]) -> str:
                     f"Число - *{order.time_created.date()}*\n" \
                     f"Товар - *{order.ordered_goods.name}*\n" \
                     f"Кількість - *{order.amount}*\n" \
-                    f"Сумма - *{order.amount}* ₴\n" \
+                    f"Сумма - *{order.total}* ₴\n" \
                     f"Статус - *{readable_status}*"
         order_list.append(order_msg)
 

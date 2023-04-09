@@ -1,4 +1,5 @@
 from pprint import pprint
+from typing import Iterable
 
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel, Period
@@ -103,9 +104,12 @@ def get_order_by_id(order_id: int) -> Order | None:
     return Order.get_or_none(id=order_id)
 
 
+def get_last_orders(user_id, n: int) -> Iterable[Order]:
+    user = User.get(user_id=user_id)
+    return user.orders.order_by(Order.time_created.desc()).limit(n)
+
+
 def get_new_users_by_per(period: Period) -> int:
-    print(period)
-    print(period.value)
     users = User.select().where(period.value < User.register_time)
     return len(users)
 
@@ -121,6 +125,15 @@ def get_all_users_stat() -> list[tuple[Period: int]]:
     pair = Period.all_time, get_new_users_by_per(Period.all_time)
     resp.append(pair)
     return resp
+
+
+def find_user_by(finder: str | int) -> None | User:
+    if finder.isdigit():
+        user = User.get_or_none(user_id=finder)
+    else:
+        user = User.get_or_none(username=finder)
+    return user
+
 
 def tests():
     x = get_all_users_stat()

@@ -6,21 +6,24 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
-from src.database.crud.get import reset_goods_cache, get_order_by_id, get_new_users_by_per, get_all_users_stat
+from src.database.crud.get import reset_goods_cache, get_order_by_id, get_new_users_by_per, get_all_users_stat, \
+    find_user_by, get_last_orders
 from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
 from src.database.tables import Goods
-from src.messages import build_goods_full_msg, build_order_info_for_admin
+from src.messages import build_goods_full_msg, build_order_info_for_admin, build_users_orders_msg
 from src.schemas import GoodsModel, per_by_name
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
     build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn, find_order_option, \
-    update_status_order_choice, update_status_order_inl, new_users_select_per_inl
+    update_status_order_choice, update_status_order_inl, new_users_select_per_inl, action_with_found_user
 from setup import admin_router, change_status
 from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import GoodsUpdateState
-from src.telegram.messages.admin_msg import build_all_new_users_stat_msg
+from src.telegram.messages.admin_msg import build_all_new_users_stat_msg, build_info_about_user
+from src.telegram.middleware.check_bot_online import block_user, unblock_user
+from src.telegram.utils.check_msg_size import divide_big_msg
 from src.telegram.utils.nitifications import send_to_all_users
 
 
@@ -209,11 +212,61 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 @admin_router.callback_query(Text(startswith='update_order_choice|'))
 async def anon(callback: CallbackQuery, state: FSMContext):
     _, order_id, new_status = callback.data.split("|")
-    print(new_status)
+    # print(new_status)
     update_order_status(int(order_id), new_status)
     order = get_order_by_id(int(order_id))
     msg = build_order_info_for_admin(order)
     await callback.message.edit_text(msg, reply_markup=update_status_order_inl(order_id))
+
+
+class FindUser(StatesGroup):
+    user_id_or_username = State()
+    cur_msg = State()
+
+
+@admin_router.message(F.text == "🔍 Знайти користувача")
+async def find_user(message: Message, state: FSMContext):
+    await message.answer("Відправте id або username", reply_markup=admin_cancel_btn)
+    await state.set_state(FindUser.user_id_or_username)
+
+
+@admin_router.message(FindUser.user_id_or_username)
+async def anon(message: Message, state: FSMContext):
+
+    user = find_user_by(message.text)
+    if user:
+        msg = build_info_about_user(user)
+        await message.answer(msg, reply_markup=action_with_found_user(user.user_id))
+    else:
+        msg = "⚠️ Користувача не знайдено"
+        await message.reply(msg, reply_markup=find_order_option)
+
+    await state.clear()
+
+
+@admin_router.callback_query(Text(startswith='found_user|'))
+async def anon(callback: CallbackQuery, state: FSMContext):
+    prefix, action, user_id = callback.data.split('|')
+    user_id = int(user_id)
+    if action == "last_10_order":
+        orders = get_last_orders(user_id, 10)
+        if orders:
+            msg = build_users_orders_msg(orders)
+            msgs_list = divide_big_msg(msg)
+            for msg in msgs_list:
+                await callback.message.answer(msg, reply_markup=admin_main_kb)
+        else:
+            await callback.message.answer("Немає замовлень", reply_markup=admin_main_kb)
+        await callback.message.delete()
+
+
+    else:
+        if action == "unblock":
+            unblock_user(user_id)
+        elif action == "block":
+            block_user(user_id)
+
+        await callback.message.edit_reply_markup(reply_markup=action_with_found_user(user_id))
 
 
 @admin_router.message(F.text == "📈 Статистика")
