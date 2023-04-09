@@ -47,6 +47,7 @@ class OrderModel(Base):
 
 
 class Period(enum.Enum):
+    day = datetime.now() - timedelta(days=1)
     week = datetime.now() - timedelta(days=7)
     month = datetime.now() - timedelta(days=30)
     year = datetime.now() - timedelta(days=360)
@@ -55,6 +56,7 @@ class Period(enum.Enum):
 
 per_by_name = {
     "week": Period.week,
+    "day": Period.day,
     "month": Period.month,
     "year": Period.year,
     "all_time": Period.all_time,

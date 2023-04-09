@@ -16,7 +16,8 @@ admin_main_kb = ReplyKeyboardMarkup(
         [KeyboardButton(text="🛍 Товари"),
          KeyboardButton(text="📊 Замовлення"),
          KeyboardButton(text="💾 Інше")],
-        [KeyboardButton(text="🔑 Створити новий промокод")]
+        [KeyboardButton(text="📈 Статистика"),
+         KeyboardButton(text="🔑 Створити новий промокод")]
     ],
     resize_keyboard=True
 )
@@ -101,3 +102,14 @@ def update_status_order_choice(order_id) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🎉 Виконанно", callback_data=f"update_order_choice|{order_id}|executed"),
         ], [InlineKeyboardButton(text="❌ Закрити", callback_data="to_main_admin_drop_msg")]
     ])
+
+
+new_users_select_per_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="🔰 За добу", callback_data="new_user_stat|day"),
+        InlineKeyboardButton(text="⌚️ За неділю", callback_data="new_user_stat|week"),
+        InlineKeyboardButton(text="🗓 За місяць", callback_data="new_user_stat|month"),
+    ], [InlineKeyboardButton(text="🌎 Юзерів загалом", callback_data="new_user_stat|all_time"),
+        InlineKeyboardButton(text="📊 Уся статистика", callback_data="new_user_stat|all_new_user_stat")],
+    [admin_drop_msg]
+])

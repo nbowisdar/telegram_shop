@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel, Period
 from loguru import logger
@@ -101,14 +103,35 @@ def get_order_by_id(order_id: int) -> Order | None:
     return Order.get_or_none(id=order_id)
 
 
+def get_new_users_by_per(period: Period) -> int:
+    print(period)
+    print(period.value)
+    users = User.select().where(period.value < User.register_time)
+    return len(users)
+
+
+def get_all_users_stat() -> list[tuple[Period: int]]:
+    resp = []
+    pair = Period.day, get_new_users_by_per(Period.day)
+    resp.append(pair)
+    pair = Period.week, get_new_users_by_per(Period.week)
+    resp.append(pair)
+    pair = Period.month, get_new_users_by_per(Period.month)
+    resp.append(pair)
+    pair = Period.all_time, get_new_users_by_per(Period.all_time)
+    resp.append(pair)
+    return resp
+
 def tests():
-    user_id = 286365412
-    #
-    # orders = Order.select().where(Order.user == user)
-    orders = get_users_orders(user_id, Period.all_time)
-    for i in orders:
-        print(i.ordered_goods)
-    # print(len(orders))
+    x = get_all_users_stat()
+    pprint(x)
+    # user_id = 286365412
+    # #
+    # # orders = Order.select().where(Order.user == user)
+    # orders = get_users_orders(user_id, Period.all_time)
+    # for i in orders:
+    #     print(i.ordered_goods)
+    # # print(len(orders))
 
 
 if __name__ == '__main__':

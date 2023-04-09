@@ -6,20 +6,21 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Text
 from aiogram import F
 
-from src.database.crud.get import reset_goods_cache, get_order_by_id
+from src.database.crud.get import reset_goods_cache, get_order_by_id, get_new_users_by_per, get_all_users_stat
 from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
 from src.database.tables import Goods
 from src.messages import build_goods_full_msg, build_order_info_for_admin
-from src.schemas import GoodsModel
+from src.schemas import GoodsModel, per_by_name
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
     build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn, find_order_option, \
-    update_status_order_choice, update_status_order_inl
+    update_status_order_choice, update_status_order_inl, new_users_select_per_inl
 from setup import admin_router, change_status
 from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import GoodsUpdateState
+from src.telegram.messages.admin_msg import build_all_new_users_stat_msg
 from src.telegram.utils.nitifications import send_to_all_users
 
 
@@ -213,3 +214,21 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     order = get_order_by_id(int(order_id))
     msg = build_order_info_for_admin(order)
     await callback.message.edit_text(msg, reply_markup=update_status_order_inl(order_id))
+
+
+@admin_router.message(F.text == "📈 Статистика")
+async def anon(message: Message):
+    await message.answer("🙋‍♂️ Нових юзерів:", reply_markup=new_users_select_per_inl)
+
+
+@admin_router.callback_query(Text(startswith='new_user_stat|'))
+async def anon(callback: CallbackQuery):
+    _, period_str = callback.data.split("|")
+    if period_str == "all_new_user_stat":
+        stat = get_all_users_stat()
+        msg = build_all_new_users_stat_msg(stat)
+        await callback.message.edit_text(msg)
+        return
+    period = per_by_name[period_str]
+    users_amount = get_new_users_by_per(period)
+    await callback.message.edit_text(f"👨‍🔧 Нових користувачів: *{users_amount}*")

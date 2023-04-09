@@ -20,6 +20,7 @@ class BaseModel(Model):
 
 class User(BaseModel):
     user_id = IntegerField(unique=True, primary_key=True)
+    register_time = DateTimeField(default=datetime.now)
 
 
 class Goods(BaseModel):

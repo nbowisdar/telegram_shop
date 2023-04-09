@@ -23,4 +23,4 @@ def divide_big_msg(msg: str) -> list[str]:
     #         resp.append(msg[0:count])
     #         msg = msg[count:]
     #         count = 0
-    return resp
+    # return resp
