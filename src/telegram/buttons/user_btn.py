@@ -9,8 +9,17 @@ from src.schemas import GoodsModel
 
 kb1 = [
     [KeyboardButton(text="🛒 Обрати товар"), KeyboardButton(text="🕺 Мій профіль")],
-    [KeyboardButton(text="✍️ Зворотній зв'язок")]
+    [KeyboardButton(text="💻 Відкрити сайт"), KeyboardButton(text="📞 Контакти")],
+    [KeyboardButton(text="✉️ Зв'язок із адміністрацією")]
 ]
+
+open_site_inl = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="💻 Відкрити сайт", url="https://stolichnyy-market.net")]
+])
+
+ask_admin = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="✍️ Написати адміністратору", url="https://t.me/nbowisdar")]
+])
 
 promo_kb = KeyboardButton(text="🧩 Застосувати промокод")
 
@@ -57,16 +66,16 @@ def get_order_kb(user_id: int) -> InlineKeyboardMarkup:
         ])
 
 
-kb_inline1 = [
-    [InlineKeyboardButton(text="🎩 Запитати на пряму", url="https://t.me/nbowisdar")],
-    [InlineKeyboardButton(text="💻 Наш сайт", url="https://stolichnyy-market.net")]
-]
-
-community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
+# kb_inline1 = [
+#     [InlineKeyboardButton(text="🎩 Запитати на пряму", url="https://t.me/nbowisdar")],
+#     [InlineKeyboardButton(text="💻 Відкрити сайт", url="https://stolichnyy-market.net")]
+# ]
+#
+# community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 ok_goods = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
-     InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num")],
+     InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|skip")],
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])
 
@@ -76,12 +85,10 @@ admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="
 
 
 def categories_inl(prefix="new_order_cat", admin=True) -> InlineKeyboardMarkup:
-    # if admin:
-    #     prefix += "adm"
     builder = InlineKeyboardBuilder()
     for cat in categories:
         builder.button(
-            text=cat.capitalize(), callback_data=f"{prefix}|{cat}"
+            text=cat, callback_data=f"{prefix}|{cat}"
         )
     builder.adjust(3)
     if not admin:
@@ -95,12 +102,19 @@ cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callbac
                    InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 
 
-def build_amount_disc_inl():
+def build_amount_disc_inl(price: float, with_desc_btn=True):
     builder = InlineKeyboardBuilder()
+    if with_desc_btn:
+        builder.row(
+            InlineKeyboardButton(text=f"📜 Опис",
+                                 callback_data=f"new_order_g|description")
+        )
     count = 0
     for amount, percent in buy_variants:
+        price_with_discount = round(
+            (price * amount) / 100 * percent)
         builder.row(
-            InlineKeyboardButton(text=f"Кількість - {amount} л. 👉 Знижка - {100-percent} %",
+            InlineKeyboardButton(text=f"Придбати - {amount} л. 👉 {round(amount * price_with_discount)} грн.",
                                  callback_data=f"new_order_addr|{count}")
         )
         count += 1
@@ -124,7 +138,7 @@ def build_amount_disc_inl():
 #     return keyboard
 
 
-def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False) -> InlineKeyboardMarkup:
+def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False,) -> InlineKeyboardMarkup:
     goods: list[GoodsModel] = get_goods_by_category(category.casefold())
     builder = InlineKeyboardBuilder()
     for g in goods:

@@ -9,6 +9,19 @@ from src.schemas import AddressModel, GoodsModel, OrderModel
 """
 
 
+def build_msg_discount_amount(goods: GoodsModel, variants: tuple[int, int], with_desc=False) -> str:
+    res = [f"*{goods.name}*\n"]
+    for amount, discount in variants:
+        price_with_discount = round(
+            (goods.price) / 100 * discount, 2)
+        res.append(
+            f"🔵 {amount} літрів — {price_with_discount} грн / літр"
+        )
+    if with_desc:
+        res.append(f"\n{goods.desc}")
+    return "\n".join(res)
+
+
 def build_address_msg(address: AddressModel) -> str:
     return f"Повне ім'я - *{address.full_name}*\n" \
            f"Мобільний - *{address.mobile_number}*\n" \
@@ -32,4 +45,4 @@ def build_result_order_msg(order: OrderModel, address: AddressModel, total: floa
            f"Місто - *{address.city}*\n" \
            f"Номер відділення НП - *{address.post_number}*\n\n" \
            f"_Тип оплати_ - *{order.type_payment}*\n" \
-           f"_Cумма (З урахуванням знижки)_ - `{total}` ₴ \n\n" \
+           f"_Cумма (З урахуванням знижки)_ - `{total}` ₴ \n\n"

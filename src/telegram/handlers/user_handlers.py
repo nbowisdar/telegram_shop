@@ -2,6 +2,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 from aiogram import F
+
+from config import contacts
 from setup import user_router
 from src.database.crud.get import get_user_schema_by_id, get_users_orders
 from src.database.tables import User
@@ -33,11 +35,18 @@ async def show_price(message: Message, state: FSMContext):
     await message.answer("Введіть ваше повне ім'я", reply_markup=cancel_btn)
 
 
-
-@user_router.message(F.text == "✍️ Зворотній зв'язок")
+@user_router.message(F.text == "📞 Контакти")
 async def community(message: Message):
-    await message.answer("🦾",
-                         reply_markup=community_btn)
+    msg = "\n".join(
+        ["📞 +38" + number for number in contacts]
+    )
+    await message.answer(f"Виберіть потрібний контакт нижче:\n{msg}")
+
+
+@user_router.message(F.text == "✉️ Зв'язок із адміністрацією")
+async def community(message: Message):
+    await message.answer(f"Клацніть щоб написати",
+                         reply_markup=ask_admin)
 
 
 @user_router.message(F.text == "🕺 Мій профіль")
