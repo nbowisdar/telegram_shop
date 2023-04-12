@@ -3,7 +3,7 @@ import sys
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from config import categories, buy_variants, buy_variants_box, contact_admin_id
+from config import categories, buy_variants, buy_variants_box, contact_admin_username
 from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
 from src.schemas import GoodsModel
 
@@ -20,7 +20,7 @@ open_site_inl = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 ask_admin = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="✍️ Написати адміністратору", url=f"tg://user?id={contact_admin_id}")]
+    [InlineKeyboardButton(text="✍️ Написати адміністратору", url=f"https://t.me/{contact_admin_username}")]
 ])
 
 promo_kb = KeyboardButton(text="🧩 Застосувати промокод")
