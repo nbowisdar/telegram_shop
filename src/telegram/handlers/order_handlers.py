@@ -9,7 +9,7 @@ from aiogram import F
 from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import apply_promo_code
-from src.database.tables import order_status, type_payment, Order, buy_variants_struct
+from src.database.tables import order_status, type_payment, Order, buy_variants_struct, Goods
 from src.schemas import AddressModel, OrderModel, AmountPrice
 from src.telegram.buttons import *
 import decimal
@@ -77,23 +77,24 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     prefix, category = callback.data.split('|')
     await state.set_state(OrderState.block_input)
     await state.update_data(category=category)
+
     await callback.message.edit_text("🛍 Оберіть товар",
                                      reply_markup=build_goods_with_price_inl(category))
 
 
 @order_router.callback_query(Text(startswith="new_order_g"))
 async def anon(callback: CallbackQuery, state: FSMContext):
-    prefix, goods_name_or_desc, = callback.data.split('|')
-    if goods_name_or_desc == "description":
+    prefix, goods_id_or_desc, = callback.data.split('|')
+    if goods_id_or_desc == "description":
         data = await state.get_data()
         goods_name = data["goods_name"]
     else:
-        goods_name = goods_name_or_desc
+        goods_name = Goods.get_by_id(int(goods_id_or_desc)).name
         await state.update_data(goods_name=goods_name)
         await callback.message.delete()
     goods = get_goods_by_name(goods_name)
     price = float(goods.price)
-    if goods_name_or_desc == "description":
+    if goods_id_or_desc == "description":
         msg = build_msg_discount_amount(goods, buy_variants, with_desc=True)
         with_desc_btn = False
         await callback.message.edit_caption(caption=msg,

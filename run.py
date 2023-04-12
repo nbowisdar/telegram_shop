@@ -5,9 +5,10 @@ from src.telegram.handlers.admin_handlers import admin_router
 from src.telegram.handlers.order_handlers import order_router
 import asyncio
 from loguru import logger
-
+import argparse
 from src.telegram.middleware.admin_only import AdminOnly
 from src.telegram.middleware.check_bot_online import CheckOnline
+from src.telegram.utils.send_statistic import sending_backup, sending_backup_sync
 
 
 async def _start():
@@ -16,6 +17,9 @@ async def _start():
     dp.include_router(admin_router)
     dp.include_router(user_router)
     dp.include_router(order_router)
+    # await sending_backup()
+    if args.with_backup:
+        sending_backup_sync()
     await dp.start_polling(bot)
 
 
@@ -25,6 +29,10 @@ def start_bot():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Script for running various commands.')
+    parser.add_argument('--with_backup', action='store_true', help='Run database migrations')
+    args = parser.parse_args()
+
     logger.info("Bot started")
     try:
         start_bot()

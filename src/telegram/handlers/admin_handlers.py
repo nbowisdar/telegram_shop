@@ -69,15 +69,15 @@ async def update_goods(callback: CallbackQuery, ):
 
 @admin_router.callback_query(Text(startswith="update_one_goods"))
 async def update_goods(callback: CallbackQuery, state: FSMContext):
-    _, goods_name = callback.data.split("|")
+    _, id = callback.data.split("|")
     await callback.message.edit_text("Оберіть товар, яких хочете оновити або видалити",
-                                     reply_markup=delete_or_update_one(goods_name))
+                                     reply_markup=delete_or_update_one(id))
 
 
 @admin_router.callback_query(Text(startswith="change_one"))
 async def update_goods(callback: CallbackQuery, state: FSMContext):
-    _, action, goods_name = callback.data.split("|")
-    goods = Goods.get(name=goods_name)
+    _, action, goods_id = callback.data.split("|")
+    goods = Goods.get(id=goods_id)
     if action == "delete":
         reset_goods_cache()
         goods.delete_instance()

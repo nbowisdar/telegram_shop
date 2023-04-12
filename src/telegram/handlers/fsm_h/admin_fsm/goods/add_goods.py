@@ -10,7 +10,7 @@ from setup import admin_router
 from src.database.crud.create import create_goods
 from src.database.crud.get import update_goods_cache
 from src.schemas import GoodsModel
-from src.telegram.buttons import admin_main_kb, build_cat_kb
+from src.telegram.buttons import admin_main_kb, build_cat_kb, choose_goods_type, admin_cancel_btn
 
 """
 class GoodsModel(TypedDict):
@@ -27,6 +27,7 @@ class GoodsState(StatesGroup):
     category = State()
     price = State()
     photo = State()
+    is_in_box = State()
 
 
 @admin_router.message(F.text.casefold() == "🛑 відмінити")
@@ -71,7 +72,18 @@ async def set_name(message: Message, state: FSMContext):
         await message.reply("❌ Не вірне значення!", reply_markup=admin_main_kb)
         return
 
-    await message.answer("Відправте фото товара")
+    await message.answer("беріть тип товару", reply_markup=choose_goods_type)
+    await state.set_state(GoodsState.is_in_box)
+
+
+@admin_router.message(GoodsState.is_in_box)
+async def set_name(message: Message, state: FSMContext):
+    if message.text == "📦 В коробках":
+        box = True
+    else:
+        box = False
+    await state.update_data(is_in_box=box)
+    await message.answer("Відправте фото товара", reply_markup=admin_cancel_btn)
     await state.set_state(GoodsState.photo)
 
 

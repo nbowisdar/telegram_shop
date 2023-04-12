@@ -33,14 +33,20 @@ admin_goods_kb = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+choose_goods_type = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="📦 В коробках"), KeyboardButton(text="🍾 В літрах")],
+    [KeyboardButton(text="🛑 Відмінити")]
+],  resize_keyboard=True)
+
+
 "Inline keyboards bellow"
 
 
-def delete_or_update_one(goods_name: str) -> InlineKeyboardMarkup:
+def delete_or_update_one(id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="♻️ Оновити", callback_data=f"change_one|update|{goods_name}"),
-            InlineKeyboardButton(text="🗑 Видалити", callback_data=f"change_one|delete|{goods_name}")
+            InlineKeyboardButton(text="♻️ Оновити", callback_data=f"change_one|update|{id}"),
+            InlineKeyboardButton(text="🗑 Видалити", callback_data=f"change_one|delete|{id}")
         ],
         [admin_drop_msg]
     ])
@@ -59,6 +65,7 @@ def update_goods_inl(goods: GoodsModel) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=f"✍️ Назва", callback_data="update_goods_field|name")],
         [InlineKeyboardButton(text=f"📝 Опис", callback_data="update_goods_field|desc")],
         [InlineKeyboardButton(text=f"💵 Ціна", callback_data="update_goods_field|price")],
+        [InlineKeyboardButton(text=f"🖌 Тип", callback_data="update_goods_field|is_in_box")],
         [InlineKeyboardButton(text=f"📷 Фото", callback_data="update_goods_field|photo")],
         [admin_drop_msg]
     ])

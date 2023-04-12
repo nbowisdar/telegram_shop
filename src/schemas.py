@@ -20,11 +20,13 @@ class AddressModel(Base):
 
 
 class GoodsModel(Base):
+    id: int | None = None
     name: str
     desc: str
     category: str
     price: decimal.Decimal
     photo: str
+    is_in_box: bool
 
 
 class AmountPrice(NamedTuple):

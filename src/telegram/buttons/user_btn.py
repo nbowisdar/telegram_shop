@@ -1,3 +1,5 @@
+import sys
+
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
@@ -141,9 +143,10 @@ def build_amount_disc_inl(price: float, with_desc_btn=True):
 def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False,) -> InlineKeyboardMarkup:
     goods: list[GoodsModel] = get_goods_by_category(category.casefold())
     builder = InlineKeyboardBuilder()
+
     for g in goods:
         builder.button(
-            text=f'{g.name}: Ціна - {g.price} грн/л', callback_data=f"{prefix}|{g.name}"
+            text=f'{g.name}: Ціна - {g.price} грн/л', callback_data=f"{prefix}|{g.id}"
         )
     builder.adjust(1)
     if not admin:

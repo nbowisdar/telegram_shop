@@ -16,10 +16,15 @@ class GoodsModel(Base):
 
 
 def build_goods_full_msg(goods: GoodsModel):
+    if goods.is_in_box:
+        type_goods = "📦 В коробках"
+    else:
+        type_goods = "🍾 В літрах"
     return f"Назва - _{goods.name}_\n" \
            f"Опис - _{goods.desc}_\n" \
            f"Категорія - _{goods.category}_\n" \
-           f"Ціна - *{float(goods.price)}* ₴\n"
+           f"Ціна - *{float(goods.price)}* ₴\n" \
+           f"Тип товару - *{type_goods}*"
 
 
 def build_users_orders_msg(orders: Iterable[Order]) -> str:

@@ -5,6 +5,7 @@ from peewee import Model, CharField, IntegerField, FloatField, SqliteDatabase, \
 from setup import BASE_DIR
 import os
 import decimal
+import peeweedbevolve
 
 from src.schemas import AmountPrice
 
@@ -31,6 +32,7 @@ class Goods(BaseModel):
     category = CharField(choices=categories)
     price = DecimalField(max_digits=10, decimal_places=2)
     photo = CharField(null=True)  # link to photo in tg
+    is_in_box = BooleanField(default=False)
 
 
 class Address(BaseModel):
@@ -78,8 +80,12 @@ class UserCode(BaseModel):
     code = ForeignKeyField(PromoCode, backref="users")
 
 
-def create_table():
+def create_table(migrate=False):
     tables = [Order, PromoCode, User, Address, Goods, UserCode]
+    # if migrate:
+    #
+    #     # db.evolve() only if postgres
+    # else:
     db.create_tables(tables)
 
 

@@ -42,10 +42,16 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 async def anon(callback: CallbackQuery, state: FSMContext):
     prefix, field = callback.data.split('|')
     await state.update_data(field=field)
-    msg = await callback.message.answer("Відправ нове значення",
-                                        reply_markup=ReplyKeyboardRemove())
+    if field == "is_in_box":
+        msg = await callback.message.answer("Відправ нове значення",
+                                            reply_markup=choose_goods_type)
+    else:
+        msg = await callback.message.answer("Відправ нове значення",
+                                            reply_markup=ReplyKeyboardRemove())
+
     await state.update_data(cache_msg=msg)
     await state.set_state(GoodsUpdateState.new_value)
+    await callback.answer()
 
 
 @order_router.message(GoodsUpdateState.new_value)
@@ -57,13 +63,11 @@ async def anon(message: Message, state: FSMContext):
         try:
             new_value = message.photo[-1].file_id
             await message.delete()
-            # data = await state.get_data()
-            # goods_model = GoodsModel(**data)
-            # created = create_goods(goods_model)
         except TypeError:
             await message.reply("❌ Ви повинні відправити фото!",
                                 reply_markup=admin_main_kb)
             return
+
     if not new_value:
         new_value = message.text
     goods = update_goods_field(goods_name=data['goods'].name,

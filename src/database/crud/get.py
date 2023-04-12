@@ -71,11 +71,14 @@ class GoodsModel(TypedDict):
 def get_goods_by_category(category: str) -> list[GoodsModel]:
     if category in cat_goods.keys():
         return cat_goods[category]
-
     goods = Goods.select().where(Goods.category == category)
     resp = [GoodsModel.from_orm(g) for g in goods]
     cat_goods[category] = resp
     return resp
+
+
+# def get_goods_by_id(id: int) -> Goods:
+#     return Goods.get_by
 
 
 def update_goods_cache(goods: GoodsModel, delete=False):

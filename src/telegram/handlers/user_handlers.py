@@ -29,6 +29,9 @@ async def start(callback: CallbackQuery):
     await callback.message.answer("Головна сторінка 🌞", reply_markup=user_main_btn)
 
 
+
+
+
 @user_router.message(F.text == "🏠 Додати адрес")
 async def show_price(message: Message, state: FSMContext):
     await state.set_state(AddressState.full_name)
@@ -47,6 +50,12 @@ async def community(message: Message):
 async def community(message: Message):
     await message.answer(f"Клацніть щоб написати",
                          reply_markup=ask_admin)
+
+
+@user_router.message(F.text == "💻 Відкрити сайт")
+async def community(message: Message):
+    await message.answer(f"Клацніть щоб відкрити",
+                         reply_markup=open_site_inl)
 
 
 @user_router.message(F.text == "🕺 Мій профіль")
