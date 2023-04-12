@@ -12,7 +12,6 @@ def update_addr_field(*, user_id: int, field_name: str, new_value: str):
 def update_goods_field(*, goods_name, field_name: str, new_value: str) -> Goods | str:
     try:
         goods = Goods.get(name=goods_name)
-
         if field_name == "is_in_box":
             if new_value == "📦 В коробках":
                 new_value = 1

@@ -6,7 +6,6 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 
 from src.database.crud.update import update_goods_field
-from src.database.tables import order_status, type_payment, Order, buy_variants_struct
 from src.messages import build_goods_full_msg
 from src.telegram.buttons import *
 from aiogram import F

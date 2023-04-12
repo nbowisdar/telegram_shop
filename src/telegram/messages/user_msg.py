@@ -1,3 +1,4 @@
+from config import buy_variants_box, buy_variants
 from src.schemas import AddressModel, GoodsModel, OrderModel
 
 """class AddressModel(TypedDict):
@@ -9,13 +10,23 @@ from src.schemas import AddressModel, GoodsModel, OrderModel
 """
 
 
-def build_msg_discount_amount(goods: GoodsModel, variants: tuple[int, int], with_desc=False) -> str:
+def build_msg_discount_amount(goods: GoodsModel, is_in_box: bool, with_desc=False) -> str:
+    if is_in_box:
+        variants = buy_variants_box
+        symbol = "шт"
+        full_smb = "коробок"
+        sml = "📦"
+    else:
+        variants = buy_variants
+        symbol = "л"
+        full_smb = "літрів"
+        sml = "🔵"
     res = [f"*{goods.name}*\n"]
     for amount, discount in variants:
         price_with_discount = round(
             (goods.price) / 100 * discount, 2)
         res.append(
-            f"🔵 {amount} літрів — {price_with_discount} грн / літр"
+            f"{sml} {amount} {full_smb} — {price_with_discount} грн / {symbol}."
         )
     if with_desc:
         res.append(f"\n{goods.desc}")

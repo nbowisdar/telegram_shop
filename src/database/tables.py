@@ -11,7 +11,9 @@ from src.schemas import AmountPrice
 
 db = SqliteDatabase(os.path.join(BASE_DIR, "app.db"))
 
-buy_variants_struct = [AmountPrice(var[0], var[1]) for var in buy_variants]
+def get_buy_variants_struct(vairants: tuple, n: int):
+    vars = [AmountPrice(var[0], var[1]) for var in vairants]
+    return vars[n]
 
 
 class BaseModel(Model):

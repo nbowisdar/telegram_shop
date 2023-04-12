@@ -9,7 +9,7 @@ from aiogram import F
 from src.database.crud.create import create_new_order
 from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
 from src.database.promo_queries import apply_promo_code
-from src.database.tables import order_status, type_payment, Order, buy_variants_struct, Goods
+from src.database.tables import order_status, type_payment, Order, get_buy_variants_struct, Goods
 from src.schemas import AddressModel, OrderModel, AmountPrice
 from src.telegram.buttons import *
 import decimal
@@ -89,29 +89,51 @@ async def anon(callback: CallbackQuery, state: FSMContext):
         data = await state.get_data()
         goods_name = data["goods_name"]
     else:
-        goods_name = Goods.get_by_id(int(goods_id_or_desc)).name
+        goods = Goods.get_by_id(int(goods_id_or_desc))
+        goods_name = goods.name
+        is_in_box = goods.is_in_box
         await state.update_data(goods_name=goods_name)
+        await state.update_data(is_in_box=is_in_box)
         await callback.message.delete()
     goods = get_goods_by_name(goods_name)
+    data = await state.get_data()
+
     price = float(goods.price)
     if goods_id_or_desc == "description":
-        msg = build_msg_discount_amount(goods, buy_variants, with_desc=True)
+        msg = build_msg_discount_amount(goods, goods.is_in_box, with_desc=True)
         with_desc_btn = False
         await callback.message.edit_caption(caption=msg,
-                                            reply_markup=build_amount_disc_inl(price, with_desc_btn))
+                                            reply_markup=build_amount_disc_inl(
+                                                price=price,
+                                                with_desc_btn=with_desc_btn,
+                                                is_in_box=data['is_in_box']))
 
     else:
         with_desc_btn = True
-        msg = build_msg_discount_amount(goods, buy_variants)
+        msg = build_msg_discount_amount(goods, goods.is_in_box)
         await callback.message.answer_photo(photo=goods.photo, caption=msg,
-                                            reply_markup=build_amount_disc_inl(price, with_desc_btn))
+                                            reply_markup=build_amount_disc_inl(
+                                                price=price,
+                                                with_desc_btn=with_desc_btn,
+                                                is_in_box=data['is_in_box']))
 
 
 @order_router.callback_query(Text(startswith="new_order_addr"))
 async def select_address(callback: CallbackQuery, state: FSMContext):
 
     _, n = callback.data.split("|")
-    await state.update_data(amount_disc=buy_variants_struct[int(n)])
+    data = await state.get_data()
+    if data['is_in_box']:
+        vars = buy_variants_box
+    else:
+        vars = buy_variants
+
+
+    amount_disc = get_buy_variants_struct(
+        vairants=vars,
+        n=int(n)
+    )
+    await state.update_data(amount_disc=amount_disc)
 
     data = await state.get_data()
     user = get_user_schema_by_id(data['user_id'])
@@ -215,7 +237,17 @@ async def show_order_details(callback: CallbackQuery, state: FSMContext):
     user = get_user_schema_by_id(callback.from_user.id)
     data = await state.get_data()
     goods = get_goods_by_name(data['goods_name'])
-    amount_disc = data.get("amount_disc", buy_variants_struct[0])
+
+    # if data['is_in_box']:
+    #     vars = buy_variants
+    # else:
+    #     vars = buy_variants_box
+    # await state.update_data(amount_disc=get_buy_variants_struct(
+    #     vairants=vars,
+    #     n=int(0)
+    # ))
+
+    amount_disc = data.get("amount_disc")
     # print(amount_disc, 305)
     order = OrderModel(user_id=user.user_id,
                        amount_disc=amount_disc,
@@ -261,7 +293,7 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 @order_router.callback_query(Text("confirm_pay"))
 async def confirm_payment(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    amount_disc = data.get("amount_disc", buy_variants_struct[0])
+    amount_disc = data.get("amount_disc")
     data['amount'] = amount_disc.amount
     order: Order = create_new_order(data)
     order.status = "wait_confirmation"

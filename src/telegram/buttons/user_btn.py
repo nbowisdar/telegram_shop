@@ -3,7 +3,7 @@ import sys
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from config import categories, buy_variants
+from config import categories, buy_variants, buy_variants_box, contact_admin_id
 from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
 from src.schemas import GoodsModel
 
@@ -20,7 +20,7 @@ open_site_inl = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 ask_admin = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="✍️ Написати адміністратору", url="https://t.me/nbowisdar")]
+    [InlineKeyboardButton(text="✍️ Написати адміністратору", url=f"tg://user?id={contact_admin_id}")]
 ])
 
 promo_kb = KeyboardButton(text="🧩 Застосувати промокод")
@@ -104,7 +104,7 @@ cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callbac
                    InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 
 
-def build_amount_disc_inl(price: float, with_desc_btn=True):
+def build_amount_disc_inl(*, price: float, with_desc_btn=True, is_in_box: bool):
     builder = InlineKeyboardBuilder()
     if with_desc_btn:
         builder.row(
@@ -112,11 +112,18 @@ def build_amount_disc_inl(price: float, with_desc_btn=True):
                                  callback_data=f"new_order_g|description")
         )
     count = 0
-    for amount, percent in buy_variants:
-        price_with_discount = round(
+    if is_in_box:
+        variants = buy_variants_box
+        symbol = "шт"
+    else:
+        variants = buy_variants
+        symbol = "л"
+
+    for amount, percent in variants:
+        total = round(
             (price * amount) / 100 * percent)
         builder.row(
-            InlineKeyboardButton(text=f"Придбати - {amount} л. 👉 {round(amount * price_with_discount)} грн.",
+            InlineKeyboardButton(text=f"Придбати - {amount} {symbol}. 👉 {total} грн.",
                                  callback_data=f"new_order_addr|{count}")
         )
         count += 1
