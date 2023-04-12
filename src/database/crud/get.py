@@ -117,6 +117,13 @@ def get_new_users_by_per(period: Period) -> int:
     return len(users)
 
 
+def get_salle_by_per(period: Period) -> tuple[DecimalField, int]:
+    orders = Order.select().where(
+        (Order.time_created > period.value) & (Order.status == "confirmed")
+    )
+    return sum([order.total for order in orders]), len(orders)
+
+
 def get_all_users_stat() -> list[tuple[Period: int]]:
     resp = []
     pair = Period.day, get_new_users_by_per(Period.day)
@@ -128,6 +135,25 @@ def get_all_users_stat() -> list[tuple[Period: int]]:
     pair = Period.all_time, get_new_users_by_per(Period.all_time)
     resp.append(pair)
     return resp
+
+
+def get_all_orders_stat() -> list[tuple[Period: int]]:
+    resp = []
+    pair = Period.day, get_salle_by_per(Period.day)
+    resp.append(pair)
+    pair = Period.week, get_salle_by_per(Period.week)
+    resp.append(pair)
+    pair = Period.month, get_salle_by_per(Period.month)
+    resp.append(pair)
+    pair = Period.all_time, get_salle_by_per(Period.all_time)
+    resp.append(pair)
+    return resp
+
+
+def get_all_stat() -> list:
+    users = get_all_users_stat()
+    orders = get_all_orders_stat()
+    return [users, orders]
 
 
 def find_user_by(finder: str | int) -> None | User:
