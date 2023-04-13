@@ -1,7 +1,7 @@
 import asyncio
-
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
-
+from loguru import logger
 from config import admins
 from setup import bot
 from src.database.tables import Order, User
@@ -10,8 +10,11 @@ from src.telegram.buttons import confirm_order_inl, admin_main_kb
 
 async def send_confirmation_to_admin(msg: str):
     for admin_id in admins:
-        await bot.send_message(admin_id, msg, parse_mode="MARKDOWN",
-                               reply_markup=confirm_order_inl)
+        try:
+            await bot.send_message(admin_id, msg, parse_mode="MARKDOWN",
+                                   reply_markup=confirm_order_inl)
+        except TelegramBadRequest:
+            logger.error(f"Can't send message to admin - {admin_id}")
 
 
 async def send_text_or_photo(*, msg: Message, user_id: int):

@@ -12,9 +12,9 @@ users: dict[user_id, UserModel] = {}
 cat_goods: dict[cat_name, list[GoodsModel]] = {}
 
 
-# def update_user_cache(user: UserModel):
-#     users[user.user_id] = user
+np_addr_cache = {}
 
+# Z
 
 def update_user_addr_cache(address: AddressModel):
     if address.user_id in users.keys():

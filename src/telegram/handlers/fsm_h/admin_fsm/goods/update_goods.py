@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from aiogram.fsm.state import State, StatesGroup
 
 
@@ -49,6 +51,7 @@ async def anon(callback: CallbackQuery, state: FSMContext):
                                             reply_markup=ReplyKeyboardRemove())
 
     await state.update_data(cache_msg=msg)
+
     await state.set_state(GoodsUpdateState.new_value)
     await callback.answer()
 

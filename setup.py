@@ -1,5 +1,4 @@
 import types
-
 from aiogram import Dispatcher, Bot, Router
 from dotenv import load_dotenv
 import os
@@ -32,6 +31,9 @@ def change_status():
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
+NOVA_POST = os.getenv("NOVA_POST")
+
+BASE_URL_NP = "https://api.novaposhta.ua/v2.0/json/"
 
 bot = Bot(TOKEN, parse_mode="MARKDOWN")
 dp = Dispatcher()
