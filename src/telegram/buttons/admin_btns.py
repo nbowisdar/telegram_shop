@@ -88,6 +88,7 @@ def other_bot_btn() -> ReplyKeyboardMarkup:
 
 
 find_order_option = ReplyKeyboardMarkup(keyboard=[
+    [InlineKeyboardButton(text=f"📙 Усі замовлення")],
     [InlineKeyboardButton(text=f"🔍 Знайти замовлення"),
      InlineKeyboardButton(text=f"🔍 Знайти користувача")],
     [on_main_admin_kb]

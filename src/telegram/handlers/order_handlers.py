@@ -128,7 +128,6 @@ async def select_address(callback: CallbackQuery, state: FSMContext):
     else:
         vars = buy_variants
 
-
     amount_disc = get_buy_variants_struct(
         vairants=vars,
         n=int(n)

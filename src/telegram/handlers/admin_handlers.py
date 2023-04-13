@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timedelta
 
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -10,7 +11,7 @@ from src.database.crud.get import reset_goods_cache, get_order_by_id, get_new_us
     find_user_by, get_last_orders
 from src.database.crud.update import update_order_status
 from src.database.promo_queries import generate_new_code
-from src.database.tables import Goods
+from src.database.tables import Goods, Order
 from src.messages import build_goods_full_msg, build_order_info_for_admin, build_users_orders_msg
 from src.schemas import GoodsModel, per_by_name
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
@@ -21,7 +22,7 @@ from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.update_goods import GoodsUpdateState
-from src.telegram.messages.admin_msg import build_all_new_users_stat_msg, build_info_about_user
+from src.telegram.messages.admin_msg import build_all_new_users_stat_msg, build_info_about_user, build_all_orders_msg
 from src.telegram.middleware.check_bot_online import block_user, unblock_user
 from src.telegram.utils.check_msg_size import divide_big_msg
 from src.telegram.utils.nitifications import send_to_all_users
@@ -195,6 +196,12 @@ async def anon(message: Message, state: FSMContext):
 
 @admin_router.callback_query(Text("to_main_admin_drop_msg"))
 async def anon(callback: CallbackQuery, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    else:
+        await state.clear()
+
     await callback.message.delete()
     await callback.message.answer("Головна", reply_markup=admin_main_kb)
 
@@ -267,6 +274,36 @@ async def anon(callback: CallbackQuery, state: FSMContext):
             block_user(user_id)
 
         await callback.message.edit_reply_markup(reply_markup=action_with_found_user(user_id))
+
+
+class GetOrders(StatesGroup):
+    date = State()
+
+
+@admin_router.message(F.text == "📙 Усі замовлення")
+async def find_user(message: Message, state: FSMContext):
+    await message.answer("Укажіть проміжок часу у днях", reply_markup=admin_cancel_btn)
+    await state.set_state(GetOrders.date)
+
+
+@admin_router.message(GetOrders.date)
+async def anon(message: Message, state: FSMContext):
+    d = message.text
+    if not d.isdigit():
+        await message.reply("Повинне бути число!", reply_markup=admin_main_kb)
+        await state.clear()
+        return
+    delta = datetime.now() - timedelta(days=int(d))
+    print(delta)
+    orders = Order.select().where(Order.time_created > delta)
+    msg = build_all_orders_msg(orders)
+    if not msg:
+        return await message.answer("🤷‍♂️ За цей проміжк часу немає замовлнь",
+                                    reply_markup=find_order_option)
+    else:
+        for msg in divide_big_msg(msg):
+            await message.answer(msg, reply_markup=find_order_option)
+    await state.clear()
 
 
 @admin_router.message(F.text == "📈 Статистика")

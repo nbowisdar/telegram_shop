@@ -1,6 +1,8 @@
+from typing import Iterable
+
 from config import categories
 from src.database.crud.get import get_all_stat
-from src.database.tables import User, Goods
+from src.database.tables import User, Goods, Order, order_status
 from src.schemas import Period
 
 
@@ -53,3 +55,13 @@ def build_all_stat_msg() -> str:
 ┣ Товаров: {len(goods)}шт
 ┗ Категорий: {len(categories)}шт
 """
+
+
+def build_all_orders_msg(orders: Iterable[Order]) -> str:
+    resp = []
+    for order in orders:
+        readable_status = order_status.get(order.status)
+        resp.append(
+            f"Id - `{order.id}`\nСтатус - *{readable_status}*\nСтворенно - *{order.time_created}*\n"
+        )
+    return "\n".join(resp)
