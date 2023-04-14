@@ -10,6 +10,8 @@ from src.telegram.middleware.admin_only import AdminOnly
 from src.telegram.middleware.check_bot_online import CheckOnline
 from src.telegram.utils.send_statistic import sending_backup, sending_backup_sync
 
+logger.add("error.log", level="ERROR")
+
 
 async def _start():
     admin_router.message.middleware(AdminOnly())
@@ -23,6 +25,7 @@ async def _start():
     await dp.start_polling(bot)
 
 
+@logger.catch
 def start_bot():
     create_table()
     asyncio.run(_start())

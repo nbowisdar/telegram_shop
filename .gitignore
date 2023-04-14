@@ -6,3 +6,4 @@ test.py
 app.db
 config.py
 settings.json
+error.log

@@ -55,4 +55,5 @@ async def test():
 
     a = await get_np_address("днепр", "28")
     print(a)
-asyncio.run(test())
+
+# asyncio.run(test())
