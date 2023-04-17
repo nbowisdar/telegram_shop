@@ -27,8 +27,8 @@ async def _send_backup():
 
 async def sending_backup(sleep_sec=86400):
     while True:
-        await _send_backup()
         await asyncio.sleep(sleep_sec)
+        await _send_backup()
 
 
 def run_async_function_in_process():
