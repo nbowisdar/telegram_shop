@@ -33,7 +33,7 @@ class OrderState(StatesGroup):
     with_discount = State()
     note = State()
     promo_code = State()
-    block_input = State()
+    # block_input = State()
     current_msg = State()
     total = State()
     discount = State()
@@ -41,14 +41,19 @@ class OrderState(StatesGroup):
     type_payment = State()
 
 
-@order_router.message(OrderState.block_input)
-async def new_order(message: Message):
-    await message.delete()
+# @order_router.message(OrderState.block_input)
+# async def new_order(message: Message):
+#     await message.delete()
 
 
 @order_router.message(F.text == "🛒 Обрати товар")
 async def new_order(message: Message, state: FSMContext):
-    await state.set_state(OrderState.block_input)
+
+    current_state = await state.get_state()
+    if current_state:
+        await state.clear()
+
+    # await state.set_state(OrderState.block_input)
     data = await state.get_data()
     # await state.update_data(amount_disc=buy_variants_struct[0])
     await state.update_data(discount=0)
@@ -75,7 +80,7 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 @order_router.callback_query(Text(startswith="new_order_cat"))
 async def anon(callback: CallbackQuery, state: FSMContext):
     prefix, category = callback.data.split('|')
-    await state.set_state(OrderState.block_input)
+    # await state.set_state(OrderState.block_input)
     await state.update_data(category=category)
 
     await callback.message.edit_text("🛍 Оберіть товар",

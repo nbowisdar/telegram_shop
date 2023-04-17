@@ -11,7 +11,6 @@ def get_status() -> bool:
             data = json.load(file)
             return data['online']
     except FileNotFoundError:
-        print('exept')
         return False
 
 

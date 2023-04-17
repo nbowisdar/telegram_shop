@@ -13,6 +13,7 @@ from src.telegram.utils.send_statistic import sending_backup, sending_backup_syn
 logger.add("error.log", level="ERROR")
 
 
+@logger.catch
 async def _start():
     admin_router.message.middleware(AdminOnly())
     user_router.message.middleware(CheckOnline())
@@ -25,7 +26,6 @@ async def _start():
     await dp.start_polling(bot)
 
 
-@logger.catch
 def start_bot():
     create_table()
     asyncio.run(_start())

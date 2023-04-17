@@ -17,10 +17,20 @@ from src.telegram.utils.check_msg_size import divide_big_msg
 
 
 @user_router.message(F.text.in_(['/start', "↩️ На головну"]))
-async def start(message: Message):
-    User.get_or_create(user_id=message.from_user.id, username=message.from_user.username)
-    await message.answer("Головна сторінка 🌞",
-                         reply_markup=user_main_btn)
+async def start(message: Message, state: FSMContext):
+
+    current_state = await state.get_state()
+    if current_state:
+        await state.clear()
+
+    if not message.from_user.username:
+        await message.answer("Ми зберігаємо ваш юзернем, для швидкого зв'язку з вам\n"
+                             "Тож будьласка спочатку створіть юзернейм",
+                             reply_markup=user_main_btn)
+    else:
+        User.get_or_create(user_id=message.from_user.id, username=message.from_user.username)
+        await message.answer("Головна сторінка 🌞",
+                             reply_markup=user_main_btn)
 
 
 @user_router.callback_query(Text("user_main"))
@@ -41,7 +51,7 @@ async def show_price(message: Message, state: FSMContext):
 @user_router.message(F.text == "📞 Контакти")
 async def community(message: Message):
     msg = "\n".join(
-        ["📞 +38" + number for number in contacts]
+        ["📞 " + number for number in contacts]
     )
     await message.answer(f"Виберіть потрібний контакт нижче:\n{msg}")
 
