@@ -37,4 +37,5 @@ class CheckOnline(BaseMiddleware):
             "User is blocked"
             pass
         elif get_status() or event.from_user.id in admins:
+            print('yes')
             return await handler(event, data)

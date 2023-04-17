@@ -17,6 +17,7 @@ logger.add("error.log", level="ERROR")
 async def _start():
     admin_router.message.middleware(AdminOnly())
     user_router.message.middleware(CheckOnline())
+    order_router.message.middleware(CheckOnline())
     dp.include_router(admin_router)
     dp.include_router(user_router)
     dp.include_router(order_router)

@@ -27,6 +27,7 @@ async def _send_backup():
 
 async def sending_backup(sleep_sec=86400):
     while True:
+        logger.info(f"Send backup after {sleep_sec} sec.")
         await asyncio.sleep(sleep_sec)
         await _send_backup()
 

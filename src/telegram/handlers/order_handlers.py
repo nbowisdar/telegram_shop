@@ -33,7 +33,6 @@ class OrderState(StatesGroup):
     with_discount = State()
     note = State()
     promo_code = State()
-    # block_input = State()
     current_msg = State()
     total = State()
     discount = State()
