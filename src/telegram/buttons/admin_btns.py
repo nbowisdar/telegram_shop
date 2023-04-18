@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from setup import get_status
+from setup import get_status, get_status_pay_card
 from src.schemas import GoodsModel
 from src.telegram.middleware.check_bot_online import blocked_users
 
@@ -74,13 +74,20 @@ def update_goods_inl(goods: GoodsModel) -> InlineKeyboardMarkup:
 def other_bot_btn() -> ReplyKeyboardMarkup:
     # print(get_status())
     if get_status():
-        action = "🛑 Зупинити бота"
+        action_with_bot = "🛑 Зупинити бота"
     else:
-        action = "🚀 Запустити бота"
+        action_with_bot = "🚀 Запустити бота"
+
+    if get_status_pay_card():
+        action_with_card = "⚠️ Призупинити оплату 💳"
+    else:
+        action_with_card = "♻️ Поновити оплату 💳"
+
 
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=action)], [KeyboardButton(text="📫 Розіслати повідомлення")],
+            [KeyboardButton(text=action_with_bot), KeyboardButton(text=action_with_card)],
+            [KeyboardButton(text="📫 Розіслати повідомлення")],
             [KeyboardButton(text="⬅️ На головну")]
         ],
         resize_keyboard=True

@@ -4,29 +4,60 @@ from dotenv import load_dotenv
 import os
 import json
 
+default_settings = {
+    "online": False,
+    "pay_card": False
+}
 
-def get_status() -> bool:
+
+def get_or_generate_settings() -> dict:
     try:
+        print('true')
         with open("settings.json", mode='r', encoding="utf-8") as file:
             data = json.load(file)
-            return data['online']
+            return data
     except FileNotFoundError:
-        return False
+        with open("settings.json", mode='w', encoding="utf-8") as file:
+            json.dump(default_settings, file)
 
 
-def change_status():
+def get_status() -> bool:
+    return settings['online']
+    # try:
+    #     with open("settings.json", mode='r', encoding="utf-8") as file:
+    #         data = json.load(file)
+    #         return data['online']
+    # except FileNotFoundError:
+    #     return False
+
+
+def change_status_bot():
     online = get_status()
     if online:
-        data = {"online": False}
+        settings["online"] = False
     else:
-        data = {"online": True}
+        settings["online"] = True
 
     with open("settings.json", mode='w', encoding="utf-8") as file:
-        json.dump(data, file)
-        # return data['online']
+        json.dump(settings, file)
 
 
+def get_status_pay_card() -> bool:
+    return settings['pay_card']
 
+
+def change_status_pay_card():
+    online = get_status_pay_card()
+    if online:
+        settings["pay_card"] = False
+    else:
+        settings["pay_card"] = True
+
+    with open("settings.json", mode='w', encoding="utf-8") as file:
+        json.dump(settings, file)
+
+
+settings = get_or_generate_settings()
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")

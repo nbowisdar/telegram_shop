@@ -219,9 +219,9 @@ async def anon(message: Message, state: FSMContext):
 @order_router.callback_query(Text("type_payment"))
 async def choose_payment(obj):
     if isinstance(obj, Message):
-        await obj.edit_text("Оберіть тип оплати", reply_markup=type_delivery_inl)
+        await obj.edit_text("Оберіть тип оплати", reply_markup=get_delivery_inl())
     else:
-        await obj.message.edit_text("Оберіть тип доставки", reply_markup=type_delivery_inl)
+        await obj.message.edit_text("Оберіть тип доставки", reply_markup=get_delivery_inl())
 
 
 

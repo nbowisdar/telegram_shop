@@ -4,6 +4,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from config import categories, buy_variants, buy_variants_box, contact_admin_username
+from setup import get_status_pay_card
 from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
 from src.schemas import GoodsModel
 
@@ -182,12 +183,24 @@ if_promo_inl = InlineKeyboardMarkup(inline_keyboard=[
     cancel_shortcut
 ])
 
-type_delivery_inl = InlineKeyboardMarkup(inline_keyboard=[
-    [
-        InlineKeyboardButton(text="🚚 Сплатити онлайн", callback_data="payment|now")
-    ],
-    [InlineKeyboardButton(text="🚛 Наложний платіж", callback_data="payment|later")]
-])
+
+def get_delivery_inl() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(InlineKeyboardButton(text="🚛 Наложний платіж", callback_data="payment|later"))
+
+    if get_status_pay_card():
+        builder.row(InlineKeyboardButton(text="🚚 Сплатити онлайн", callback_data="payment|now"))
+    builder.row(cancel_inl_ord)
+    return builder.as_markup()
+
+
+# type_delivery_inl = InlineKeyboardMarkup(inline_keyboard=[
+#     [
+#         InlineKeyboardButton(text="🚚 Сплатити онлайн", callback_data="payment|now")
+#     ],
+#     [InlineKeyboardButton(text="🚛 Наложний платіж", callback_data="payment|later")]
+# ])
 
 create_new_ordr_inl = InlineKeyboardMarkup(inline_keyboard=[
     [

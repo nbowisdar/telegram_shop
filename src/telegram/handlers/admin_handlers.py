@@ -17,7 +17,7 @@ from src.schemas import GoodsModel, per_by_name
 from src.telegram.buttons import admin_main_kb, admin_goods_kb, admin_cancel_btn, categories_inl, \
     build_goods_with_price_inl, delete_or_update_one, update_goods_inl, other_bot_btn, find_order_option, \
     update_status_order_choice, update_status_order_inl, new_users_select_per_inl, action_with_found_user
-from setup import admin_router, change_status
+from setup import admin_router, change_status_bot, change_status_pay_card
 from setup import bot
 from src.telegram.handlers.fsm_h.admin_fsm.add_promo_fsm import PromoCodeState
 from src.telegram.handlers.fsm_h.admin_fsm.goods.add_goods import GoodsState
@@ -136,11 +136,20 @@ async def anon(message: Message, state: FSMContext):
 
 @admin_router.message(F.text.in_(["🛑 Зупинити бота", "🚀 Запустити бота"]))
 async def anon(message: Message, state: FSMContext):
-    change_status()
+    change_status_bot()
     if message.text == "🛑 Зупинити бота":
         await message.answer("⏸ Роботу бота зупиненно!", reply_markup=other_bot_btn())
     else:
         await message.answer("🎉 Бот активованно!", reply_markup=other_bot_btn())
+
+
+@admin_router.message(F.text.in_(["⚠️ Призупинити оплату 💳", "♻️ Поновити оплату 💳"]))
+async def anon(message: Message, state: FSMContext):
+    change_status_pay_card()
+    if message.text == "⚠️ Призупинити оплату 💳":
+        await message.answer("⏸ Прийом оплати на карту зупиненно!", reply_markup=other_bot_btn())
+    else:
+        await message.answer("🎉 Прийом платежів на карту активовано!", reply_markup=other_bot_btn())
 
 
 class NotifyAll(StatesGroup):
