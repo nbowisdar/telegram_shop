@@ -68,10 +68,17 @@ class GoodsModel(TypedDict):
 """
 
 
-def get_goods_by_category(category: str) -> list[GoodsModel]:
-    if category in cat_goods.keys():
-        return cat_goods[category]
-    goods = Goods.select().where(Goods.category == category)
+def get_goods_by_category(category: str, admin) -> list[GoodsModel]:
+    # if category in cat_goods.keys():
+    #     return cat_goods[category]
+
+
+    if not admin:
+        goods = Goods.select().where(
+            (Goods.category == category) & (Goods.active == True)
+        )
+    else:
+        goods = Goods.select().where(Goods.category == category)
     resp = [GoodsModel.from_orm(g) for g in goods]
     cat_goods[category] = resp
     return resp

@@ -12,7 +12,6 @@ default_settings = {
 
 def get_or_generate_settings() -> dict:
     try:
-        print('true')
         with open("settings.json", mode='r', encoding="utf-8") as file:
             data = json.load(file)
             return data

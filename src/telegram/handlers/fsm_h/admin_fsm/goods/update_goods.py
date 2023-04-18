@@ -8,6 +8,7 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.filters import Command, Text
 
 from src.database.crud.update import update_goods_field
+from src.database.tables import Goods
 from src.messages import build_goods_full_msg
 from src.telegram.buttons import *
 from aiogram import F
@@ -37,6 +38,22 @@ async def anon(callback: CallbackQuery, state: FSMContext):
         return
 
     # await new_order(callback.message, state)
+
+
+@order_router.callback_query(Text(startswith="change_goods_active"))
+async def update_goods(callback: CallbackQuery):
+    _, goods_id = callback.data.split("|")
+    goods = Goods.get(id=int(goods_id))
+    if goods.active:
+        goods.active = False
+    else:
+        goods.active = True
+    goods.save()
+    goods_model = GoodsModel.from_orm(goods)
+    msg = build_goods_full_msg(goods_model)
+    await callback.message.edit_caption(photo=goods.photo, caption=msg,
+                                        parse_mode="MARKDOWN",
+                                        reply_markup=update_goods_inl(goods_model))
 
 
 @order_router.callback_query(Text(startswith="update_goods_field"))

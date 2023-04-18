@@ -64,14 +64,16 @@ async def add_goods(message: Message, state: FSMContext):
 @admin_router.callback_query(Text(startswith="update_goods_cat"))
 async def update_goods(callback: CallbackQuery, ):
     _, action = callback.data.split("|")
-    await callback.message.edit_text("Оберіть товар, яких хочете оновити або видалити",
-                                     reply_markup=build_goods_with_price_inl(action, "update_one_goods", True))
+    await callback.message.edit_text("Оберіть товар, який хочете оновити або видалити",
+                                     reply_markup=build_goods_with_price_inl(action,
+                                                                             "update_one_goods",
+                                                                             True))
 
 
 @admin_router.callback_query(Text(startswith="update_one_goods"))
 async def update_goods(callback: CallbackQuery, state: FSMContext):
     _, id = callback.data.split("|")
-    await callback.message.edit_text("Оберіть товар, яких хочете оновити або видалити",
+    await callback.message.edit_text("Оберіть товар, який хочете оновити або видалити",
                                      reply_markup=delete_or_update_one(id))
 
 
@@ -94,6 +96,7 @@ async def update_goods(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer_photo(photo=goods.photo, caption=msg,
                                             parse_mode="MARKDOWN",
                                             reply_markup=update_goods_inl(goods_model))
+
 
 
 @admin_router.message(F.text == "🔑 Створити новий промокод")

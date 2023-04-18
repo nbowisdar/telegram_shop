@@ -20,11 +20,18 @@ def build_goods_full_msg(goods: GoodsModel):
         type_goods = "📦 В коробках"
     else:
         type_goods = "🍾 В літрах"
-    return f"Назва - _{goods.name}_\n" \
+
+    if goods.active:
+        status = "✅ Продається"
+    else:
+        status = "⚠️ Не продається"
+    resp = f"{status}\n\n"\
+           f"Назва - _{goods.name}_\n" \
            f"Опис - _{goods.desc}_\n" \
            f"Категорія - _{goods.category}_\n" \
            f"Ціна - *{float(goods.price)}* ₴\n" \
            f"Тип товару - *{type_goods}*"
+    return resp
 
 
 def build_users_orders_msg(orders: Iterable[Order]) -> str:

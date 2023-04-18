@@ -36,6 +36,7 @@ class Goods(BaseModel):
     price = DecimalField(max_digits=10, decimal_places=2)
     photo = CharField(null=True)  # link to photo in tg
     is_in_box = BooleanField(default=False)
+    active = BooleanField(default=True)
 
 
 class Address(BaseModel):

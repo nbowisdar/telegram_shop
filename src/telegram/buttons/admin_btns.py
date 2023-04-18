@@ -61,11 +61,16 @@ confirm_order_inl = InlineKeyboardMarkup(inline_keyboard=[
 
 
 def update_goods_inl(goods: GoodsModel) -> InlineKeyboardMarkup:
+    if not goods.active:
+        status = "♻️ Виставити на продаж"
+    else:
+        status = "⚠️ Зняти з продажу"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"✍️ Назва", callback_data="update_goods_field|name")],
-        [InlineKeyboardButton(text=f"📝 Опис", callback_data="update_goods_field|desc")],
-        [InlineKeyboardButton(text=f"💵 Ціна", callback_data="update_goods_field|price")],
-        [InlineKeyboardButton(text=f"🖌 Тип", callback_data="update_goods_field|is_in_box")],
+        [InlineKeyboardButton(text=status, callback_data=f"change_goods_active|{goods.id}")],
+        [InlineKeyboardButton(text=f"✍️ Назва", callback_data="update_goods_field|name"),
+        InlineKeyboardButton(text=f"📝 Опис", callback_data="update_goods_field|desc")],
+        [InlineKeyboardButton(text=f"💵 Ціна", callback_data="update_goods_field|price"),
+        InlineKeyboardButton(text=f"🖌 Тип", callback_data="update_goods_field|is_in_box")],
         [InlineKeyboardButton(text=f"📷 Фото", callback_data="update_goods_field|photo")],
         [admin_drop_msg]
     ])

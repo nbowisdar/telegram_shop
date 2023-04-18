@@ -87,6 +87,9 @@ from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", cal
 admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="admin_drop_msg")
 
 
+
+
+
 def categories_inl(prefix="new_order_cat", admin=True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for cat in categories:
@@ -134,22 +137,11 @@ def build_amount_disc_inl(*, price: float, with_desc_btn=True, is_in_box: bool):
     )
     return builder.as_markup()
 
-# def build_amount_disc_inl():
-#     buttons = [
-#         [InlineKeyboardButton(text="✅ Підтвердити", callback_data="new_order_num|finish")],
-#         [
-#             InlineKeyboardButton(text="-1", callback_data="new_order_num|decr"),
-#             InlineKeyboardButton(text="+1", callback_data="new_order_num|incr")
-#         ],
-#         [InlineKeyboardButton(text="✍️ Інше значення", callback_data="new_order_num|other")],
-#         cancel_shortcut
-#     ]
-#     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-#     return keyboard
+
 
 
 def build_goods_with_price_inl(category: str, prefix="new_order_g", admin=False,) -> InlineKeyboardMarkup:
-    goods: list[GoodsModel] = get_goods_by_category(category.casefold())
+    goods: list[GoodsModel] = get_goods_by_category(category.casefold(), admin)
     builder = InlineKeyboardBuilder()
 
     for g in goods:

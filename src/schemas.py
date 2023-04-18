@@ -27,6 +27,7 @@ class GoodsModel(Base):
     price: decimal.Decimal
     photo: str
     is_in_box: bool
+    active: bool
 
 
 class AmountPrice(NamedTuple):
