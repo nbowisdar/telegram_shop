@@ -230,28 +230,19 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     _, key = callback.data.split("|")
 
     await state.update_data(type_payment=key)
-    await callback.message.edit_text(f"Тип оплати - *{type_payment[key]}*",
-                                     parse_mode="MARKDOWN",
-                                     reply_markup=show_details)
+    # await callback.message.edit_text(f"Тип оплати - *{type_payment[key]}*",
+    #                                  parse_mode="MARKDOWN",
+    #                                  reply_markup=show_details)
 
 
-@order_router.callback_query(Text("show_oder_details"))
-async def show_order_details(callback: CallbackQuery, state: FSMContext):
+# @order_router.callback_query(Text("show_oder_details"))
+# async def show_order_details(callback: CallbackQuery, state: FSMContext):
     user = get_user_schema_by_id(callback.from_user.id)
     data = await state.get_data()
     goods = get_goods_by_name(data['goods_name'])
 
-    # if data['is_in_box']:
-    #     vars = buy_variants
-    # else:
-    #     vars = buy_variants_box
-    # await state.update_data(amount_disc=get_buy_variants_struct(
-    #     vairants=vars,
-    #     n=int(0)
-    # ))
 
     amount_disc = data.get("amount_disc")
-    # print(amount_disc, 305)
     order = OrderModel(user_id=user.user_id,
                        amount_disc=amount_disc,
                        ordered_goods=goods,
