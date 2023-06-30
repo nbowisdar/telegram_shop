@@ -27,7 +27,7 @@ class GoodsModel(Base):
     price: decimal.Decimal
     photo: str
     is_in_box: bool
-    active: bool
+    active: bool = True
 
 
 class AmountPrice(NamedTuple):
@@ -66,6 +66,7 @@ per_by_name = {
 }
 # def get_period_by_name()
 
+
 class UserModel(Base):
     user_id: int
     orders: list[OrderModel]
@@ -76,5 +77,3 @@ class PromoCodeModel(Base):
     code: str
     max_use_left: int
     discount_percent: int
-
-

@@ -18,6 +18,8 @@ async def send_confirmation_to_admin(msg: str):
             )
         except aiogram.exceptions.TelegramForbiddenError:
             logger.error(f"Admin blocks bot {admin_id}")
+        except Exception as e:
+            logger.error(f"{e}")
 
 
 async def send_text_or_photo(*, msg: Message, user_id: int):
@@ -40,6 +42,8 @@ async def send_to_all_users(msg: Message):
                 count += 1
             except aiogram.exceptions.TelegramForbiddenError:
                 logger.error(f"User blocks bot {user.user_id}")
+            except Exception as e:
+                logger.error(f"{e}")
     await msg.reply(
         f"Користувачів отримали повідомлення - {count}", reply_markup=admin_main_kb
     )

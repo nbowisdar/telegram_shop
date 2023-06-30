@@ -10,7 +10,12 @@ from setup import admin_router
 from src.database.crud.create import create_goods
 from src.database.crud.get import update_goods_cache
 from src.schemas import GoodsModel
-from src.telegram.buttons import admin_main_kb, build_cat_kb, choose_goods_type, admin_cancel_btn
+from src.telegram.buttons import (
+    admin_main_kb,
+    build_cat_kb,
+    choose_goods_type,
+    admin_cancel_btn,
+)
 
 """
 class GoodsModel(TypedDict):
@@ -43,12 +48,14 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
 async def set_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(GoodsState.desc)
-    await message.answer("Введить опис до товару",
-                         parse_mode="MARKDOWN",)
+    await message.answer(
+        "Введить опис до товару",
+        parse_mode="MARKDOWN",
+    )
 
 
 @admin_router.message(GoodsState.desc)
-async def set_name(message: Message, state: FSMContext):
+async def anon(message: Message, state: FSMContext):
     await state.update_data(desc=message.text)
     # await state.set_state(GoodsState.category)
     await message.answer("Оберіть категорію", reply_markup=build_cat_kb(is_admin=True))
@@ -56,14 +63,14 @@ async def set_name(message: Message, state: FSMContext):
 
 @admin_router.callback_query(Text(startswith="add_goods|"))
 async def add_state(callback: CallbackQuery, state: FSMContext):
-    prefix, category = callback.data.split('|')
+    prefix, category = callback.data.split("|")
     await state.update_data(category=category.casefold())
     await state.set_state(GoodsState.price)
     await callback.message.edit_text("Укажіть ціну")
 
 
 @admin_router.message(GoodsState.price)
-async def set_name(message: Message, state: FSMContext):
+async def anon(message: Message, state: FSMContext):
     try:
         price = decimal.Decimal(message.text)
         await state.update_data(price=price.quantize(decimal.Decimal("0.01")))
@@ -77,7 +84,7 @@ async def set_name(message: Message, state: FSMContext):
 
 
 @admin_router.message(GoodsState.is_in_box)
-async def set_name(message: Message, state: FSMContext):
+async def anon(message: Message, state: FSMContext):
     if message.text == "📦 В коробках":
         box = True
     else:
@@ -88,7 +95,7 @@ async def set_name(message: Message, state: FSMContext):
 
 
 @admin_router.message(GoodsState.photo)
-async def set_name(message: Message, state: FSMContext):
+async def anon(message: Message, state: FSMContext):
     try:
         await state.update_data(photo=message.photo[-1].file_id)
         await message.delete()
@@ -99,12 +106,12 @@ async def set_name(message: Message, state: FSMContext):
             await message.answer("✅ Ви додали новий товар!", reply_markup=admin_main_kb)
             update_goods_cache(goods_model)
         else:
-            await message.answer("❌ Помилка\nСкорішь за все такий товар вже існує!", reply_markup=admin_main_kb)
+            await message.answer(
+                "❌ Помилка\nСкорішь за все такий товар вже існує!",
+                reply_markup=admin_main_kb,
+            )
 
     except TypeError:
-        await message.reply("❌ Ви повинні відправити фото!",
-                            reply_markup=admin_main_kb)
+        await message.reply("❌ Ви повинні відправити фото!", reply_markup=admin_main_kb)
     finally:
         await state.clear()
-
-
