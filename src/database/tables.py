@@ -4,8 +4,6 @@ from peewee import Model, CharField, IntegerField, FloatField, SqliteDatabase, \
     ForeignKeyField, BooleanField, TextField, DecimalField, DateTimeField
 from setup import BASE_DIR
 import os
-import decimal
-import peeweedbevolve
 
 from src.schemas import AmountPrice
 
@@ -24,7 +22,7 @@ class BaseModel(Model):
 
 class User(BaseModel):
     user_id = IntegerField(unique=True, primary_key=True)
-    username = CharField(max_length=100)
+    username = CharField(max_length=100, null=True)
     register_time = DateTimeField(default=datetime.now)
     banned = BooleanField(default=False)
 

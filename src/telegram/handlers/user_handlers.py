@@ -24,8 +24,8 @@ async def start(message: Message, state: FSMContext):
         await state.clear()
 
     if not message.from_user.username:
-        await message.answer("Ми зберігаємо ваш юзернем, для швидкого зв'язку з вам\n"
-                             "Тож будьласка спочатку створіть юзернейм",
+        await message.answer("Ми зберігаємо ваш username, для швидкого зв'язку з вами\n"
+                             "Тож будь ласка спочатку створіть username",
                              reply_markup=user_main_btn)
     else:
         User.get_or_create(user_id=message.from_user.id, username=message.from_user.username)
@@ -108,5 +108,6 @@ async def update_addr(callback: CallbackQuery):
             await callback.message.answer(msg)
 
     await callback.answer()
+
 
 

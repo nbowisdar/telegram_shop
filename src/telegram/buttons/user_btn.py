@@ -3,7 +3,7 @@ import sys
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from config import categories, buy_variants, buy_variants_box, contact_admin_username
+from config import categories, site, buy_variants, buy_variants_box, contact_admin_username
 from setup import get_status_pay_card
 from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
 from src.schemas import GoodsModel
@@ -17,7 +17,7 @@ kb1 = [
 ]
 
 open_site_inl = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="💻 Відкрити сайт", url="https://stolichnyy-market.net")]
+    [InlineKeyboardButton(text="💻 Відкрити сайт", url=site)]
 ])
 
 ask_admin = InlineKeyboardMarkup(inline_keyboard=[
@@ -77,13 +77,13 @@ def get_order_kb(user_id: int) -> InlineKeyboardMarkup:
 # community_btn = InlineKeyboardMarkup(inline_keyboard=kb_inline1)
 
 ok_goods = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
+    [InlineKeyboardButton(text="↩️ Спочатку", callback_data="order_drop|from_scratch"),
      InlineKeyboardButton(text="Далі ➡️", callback_data="new_order_num|skip")],
     [InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 ])
 
 cancel_inl_ord = InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")
-from_scratch_inl_ord = InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")
+from_scratch_inl_ord = InlineKeyboardButton(text="↩️ Спочатку", callback_data="order_drop|from_scratch")
 admin_drop_msg = InlineKeyboardButton(text="❌ Закрити", callback_data="admin_drop_msg")
 
 
@@ -104,7 +104,7 @@ def categories_inl(prefix="new_order_cat", admin=True) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-cancel_shortcut = [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch"),
+cancel_shortcut = [InlineKeyboardButton(text="↩️ Спочатку", callback_data="order_drop|from_scratch"),
                    InlineKeyboardButton(text="❌ Скасувати", callback_data="order_drop|cancel")]
 
 
@@ -210,5 +210,6 @@ pay_inl = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text="💳 Я оплатив", callback_data="confirm_pay")
     ],
-    [InlineKeyboardButton(text="↩️ З початку", callback_data="order_drop|from_scratch")]
+    [InlineKeyboardButton(text="↩️ Спочатку", callback_data="order_drop|from_scratch")]
 ])
+
