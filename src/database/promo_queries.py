@@ -16,18 +16,17 @@ def _generate_promo_code(num_char: int) -> str:
     return code[0:4] + "_" + code[4:]
 
 
-def generate_new_code(*, max_use_left=10000, discount_percent=10, num_char=8) -> PromoCodeModel:
-    code = _generate_promo_code(num_char)
-    while True:
-        try:
-            code = PromoCodeModel(code=code,
-                                  max_use_left=max_use_left,
-                                  discount_percent=discount_percent)
-            PromoCode.create(**code.dict())
-            print(code.code)
-            return code
-        except IntegrityError:
-            pass
+def generate_new_code(
+    *, max_use_left=10000, discount_percent=10, num_char=8, code: str | None = None
+) -> PromoCodeModel:
+    if not code:
+        code = _generate_promo_code(num_char)
+    code = PromoCodeModel(
+        code=code, max_use_left=max_use_left, discount_percent=discount_percent
+    )
+    PromoCode.create(**code.dict())
+    print(code.code)
+    return code
 
 
 def apply_promo_code(code: str, user_id: int, use=False) -> PromoCodeModel:

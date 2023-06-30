@@ -8,11 +8,10 @@ import json
 
 def get_status() -> bool:
     try:
-        with open("settings.json", mode='r', encoding="utf-8") as file:
+        with open("settings.json", mode="r", encoding="utf-8") as file:
             data = json.load(file)
-            return data['online']
+            return data["online"]
     except FileNotFoundError:
-        print('exept')
         return False
 
 
@@ -23,11 +22,9 @@ def change_status():
     else:
         data = {"online": True}
 
-    with open("settings.json", mode='w', encoding="utf-8") as file:
+    with open("settings.json", mode="w", encoding="utf-8") as file:
         json.dump(data, file)
         # return data['online']
-
-
 
 
 load_dotenv()
