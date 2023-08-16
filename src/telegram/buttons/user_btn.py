@@ -1,11 +1,11 @@
 import sys
 
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from config import categories, site, buy_variants, buy_variants_box, contact_admin_username
 from setup import get_status_pay_card
-from src.database.crud.get import get_user_schema_by_id, get_goods_by_category
+from src.database.crud.get import get_user_schema_by_msg, get_goods_by_category
 from src.schemas import GoodsModel
 
 # from src.database.queries import get_all_accounts
@@ -43,8 +43,8 @@ addr_inline_fields = InlineKeyboardMarkup(
 )
 
 
-def build_profile_kb(user_id: int) -> ReplyKeyboardMarkup:
-    user = get_user_schema_by_id(user_id)
+def build_profile_kb(msg: Message) -> ReplyKeyboardMarkup:
+    user = get_user_schema_by_msg(msg)
     if user.address:
         addr_btn = "🔨 Оновити адрес"
     else:

@@ -5,7 +5,7 @@ from aiogram import F
 
 from config import contacts
 from setup import user_router
-from src.database.crud.get import get_user_schema_by_id, get_users_orders
+from src.database.crud.get import get_user_schema_by_msg, get_users_orders
 from src.database.tables import User
 from src.messages import build_users_orders_msg
 from src.schemas import per_by_name
@@ -70,12 +70,12 @@ async def community(message: Message):
 
 @user_router.message(F.text == "🕺 Мій профіль")
 async def profile(message: Message):
-    await message.answer("🕺  профіль", reply_markup=build_profile_kb(message.from_user.id))
+    await message.answer("🕺  профіль", reply_markup=build_profile_kb(message))
 
 
 @user_router.message(F.text == "🔨 Оновити адрес")
 async def addr(message: Message):
-    user = get_user_schema_by_id(message.from_user.id)
+    user = get_user_schema_by_msg(message)
     addr = build_address_msg(user.address)
     await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 

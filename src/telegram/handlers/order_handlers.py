@@ -7,9 +7,9 @@ from aiogram.filters import Command, Text
 from aiogram import F
 
 from src.database.crud.create import create_new_order
-from src.database.crud.get import get_goods_by_name, get_user_schema_by_id
+from src.database.crud.get import get_goods_by_name, get_user_schema_by_msg
 from src.database.promo_queries import apply_promo_code
-from src.database.tables import order_status, type_payment, Order, get_buy_variants_struct, Goods
+from src.database.tables import order_status, type_payment, Order, get_buy_variants_struct, Goods, User
 from src.schemas import AddressModel, OrderModel, AmountPrice
 from src.telegram.buttons import *
 import decimal
@@ -139,7 +139,8 @@ async def select_address(callback: CallbackQuery, state: FSMContext):
     await state.update_data(amount_disc=amount_disc)
 
     data = await state.get_data()
-    user = get_user_schema_by_id(data['user_id'])
+    # user = get_user_schema_by_msg(data['user_id'])
+    user = User.get_by_id(data["user_id"])
 
     if isinstance(callback, Message):
         if user.address:
@@ -174,9 +175,9 @@ async def anon(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     msg = "Заказ скасовано, після оновлення вашого адресу будьласка відтворити свої дії."
     await callback.message.edit_text(msg)
-    user = get_user_schema_by_id(callback.from_user.id)
-    addr = build_address_msg(user.address)
-    await callback.message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
+    # user = get_user_schema_by_msg(callback)
+    # addr = build_address_msg(user.address)
+    await callback.message.answer(msg, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)
 
 
 @order_router.callback_query(Text("addr_confirmed"))
@@ -237,9 +238,9 @@ async def anon(callback: CallbackQuery, state: FSMContext):
 
 # @order_router.callback_query(Text("show_oder_details"))
 # async def show_order_details(callback: CallbackQuery, state: FSMContext):
-    user = get_user_schema_by_id(callback.from_user.id)
-    data = await state.get_data()
-    goods = get_goods_by_name(data['goods_name'])
+#     user = get_user_schema_by_id(callback.from_user.id)
+#     data = await state.get_data()
+#     goods = get_goods_by_name(data['goods_name'])
 
 
     amount_disc = data.get("amount_disc")

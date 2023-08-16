@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from setup import user_router
-from src.database.crud.get import get_user_schema_by_id, remove_user_from_cache
+from src.database.crud.get import get_user_schema_by_msg, remove_user_from_cache
 from src.database.crud.update import update_addr_field
 from src.telegram.buttons import addr_inline_fields
 from src.telegram.messages.user_msg import build_address_msg
@@ -40,6 +40,6 @@ async def update_filed(message: Message, state: FSMContext):
     )
     remove_user_from_cache(user_id)
 
-    user = get_user_schema_by_id(message.from_user.id)
+    user = get_user_schema_by_msg(message)
     addr = build_address_msg(user.address)
     await message.answer(addr, parse_mode="MARKDOWN", reply_markup=addr_inline_fields)

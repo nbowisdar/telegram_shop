@@ -1,6 +1,8 @@
 from pprint import pprint
 from typing import Iterable
 
+from aiogram.types import Message
+
 from src.database.tables import *
 from src.schemas import AddressModel, GoodsModel, UserModel, OrderModel, Period
 from loguru import logger
@@ -35,11 +37,14 @@ def remove_user_from_cache(user_id):
         del users[user_id]
 
 
-def get_user_schema_by_id(user_id: int) -> UserModel:
+
+
+def get_user_schema_by_msg(msg: Message) -> UserModel:
+    user_id = msg.from_user.user_id
     if user_id in users.keys():
         print("Took from cash!!)")
         return users[user_id]
-    user, created = User.get_or_create(user_id=user_id)
+    user, created = User.get_or_create(user_id=user_id, username=msg.from_user.username)
     if created:
         user_model = UserModel(user_id=user_id, orders=[], address=None)
         users[user_id] = user_model
